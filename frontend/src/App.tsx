@@ -12,6 +12,7 @@ import { Agent } from './pages/Agent'
 import { Connections } from './pages/Connections'
 import { Logs } from './pages/Logs'
 import { Runs } from './pages/Runs'
+import { OrchestrationSimulator } from './pages/OrchestrationSimulator'
 import { AgentWidget } from './components/AgentWidget'
 import { api } from './api/client'
 import { useAppStore } from './store/useAppStore'
@@ -53,6 +54,7 @@ function AppRoutes() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/agent" element={<Agent />} />
+          <Route path="/orchestration/simulator" element={<OrchestrationSimulator />} />
           <Route path="/connections" element={<Connections />} />
           <Route path="/logs" element={<Logs />} />
           <Route path="/runs" element={<Runs />} />
