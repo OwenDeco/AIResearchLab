@@ -5,6 +5,7 @@ import {
   Network,
   MessageSquare,
   Bot,
+  Gamepad2,
   Plug,
   FlaskConical,
   BarChart3,
@@ -35,6 +36,7 @@ const navGroups: Array<{
     items: [
       { to: '/playground', icon: MessageSquare, label: 'Runtime Playground' },
       { to: '/agent',      icon: Bot,           label: 'Agent' },
+      { to: '/orchestration/simulator', icon: Gamepad2, label: 'Pixel Simulator' },
     ],
   },
   {
