@@ -1,0 +1,55 @@
+Collecting pdfplumber
+  Downloading pdfplumber-0.11.9-py3-none-any.whl.metadata (43 kB)
+Collecting python-docx
+  Downloading python_docx-1.2.0-py3-none-any.whl.metadata (2.0 kB)
+Collecting openpyxl
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting python-pptx
+  Downloading python_pptx-1.0.2-py3-none-any.whl.metadata (2.5 kB)
+Collecting beautifulsoup4
+  Downloading beautifulsoup4-4.14.3-py3-none-any.whl.metadata (3.8 kB)
+Collecting pdfminer.six==20251230 (from pdfplumber)
+  Downloading pdfminer_six-20251230-py3-none-any.whl.metadata (4.3 kB)
+Requirement already satisfied: Pillow>=9.1 in c:\users\gebruiker\appdata\local\programs\python\python312\lib\site-packages (from pdfplumber) (12.1.1)
+Collecting pypdfium2>=4.18.0 (from pdfplumber)
+  Downloading pypdfium2-5.6.0-py3-none-win_amd64.whl.metadata (68 kB)
+Requirement already satisfied: charset-normalizer>=2.0.0 in c:\users\gebruiker\appdata\local\programs\python\python312\lib\site-packages (from pdfminer.six==20251230->pdfplumber) (3.4.6)
+Collecting cryptography>=36.0.0 (from pdfminer.six==20251230->pdfplumber)
+  Downloading cryptography-46.0.6-cp311-abi3-win_amd64.whl.metadata (5.7 kB)
+Collecting lxml>=3.1.0 (from python-docx)
+  Downloading lxml-6.0.2-cp312-cp312-win_amd64.whl.metadata (3.7 kB)
+Requirement already satisfied: typing_extensions>=4.9.0 in c:\users\gebruiker\appdata\local\programs\python\python312\lib\site-packages (from python-docx) (4.15.0)
+Collecting et-xmlfile (from openpyxl)
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Collecting XlsxWriter>=0.5.7 (from python-pptx)
+  Downloading xlsxwriter-3.2.9-py3-none-any.whl.metadata (2.7 kB)
+Collecting soupsieve>=1.6.1 (from beautifulsoup4)
+  Downloading soupsieve-2.8.3-py3-none-any.whl.metadata (4.6 kB)
+Collecting cffi>=2.0.0 (from cryptography>=36.0.0->pdfminer.six==20251230->pdfplumber)
+  Downloading cffi-2.0.0-cp312-cp312-win_amd64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=36.0.0->pdfminer.six==20251230->pdfplumber)
+  Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+Downloading pdfplumber-0.11.9-py3-none-any.whl (60 kB)
+Downloading pdfminer_six-20251230-py3-none-any.whl (6.6 MB)
+   ---------------------------------------- 6.6/6.6 MB 22.5 MB/s  0:00:00
+Downloading python_docx-1.2.0-py3-none-any.whl (252 kB)
+Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Downloading python_pptx-1.0.2-py3-none-any.whl (472 kB)
+Downloading beautifulsoup4-4.14.3-py3-none-any.whl (107 kB)
+Downloading cryptography-46.0.6-cp311-abi3-win_amd64.whl (3.5 MB)
+   ---------------------------------------- 3.5/3.5 MB 34.3 MB/s  0:00:00
+Downloading cffi-2.0.0-cp312-cp312-win_amd64.whl (183 kB)
+Downloading lxml-6.0.2-cp312-cp312-win_amd64.whl (4.0 MB)
+   ---------------------------------------- 4.0/4.0 MB 39.9 MB/s  0:00:00
+Downloading pypdfium2-5.6.0-py3-none-win_amd64.whl (3.7 MB)
+   ---------------------------------------- 3.7/3.7 MB 43.7 MB/s  0:00:00
+Downloading soupsieve-2.8.3-py3-none-any.whl (37 kB)
+Downloading xlsxwriter-3.2.9-py3-none-any.whl (175 kB)
+Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+Installing collected packages: XlsxWriter, soupsieve, pypdfium2, pycparser, lxml, et-xmlfile, python-pptx, python-docx, openpyxl, cffi, beautifulsoup4, cryptography, pdfminer.six, pdfplumber
+
+Successfully installed XlsxWriter-3.2.9 beautifulsoup4-4.14.3 cffi-2.0.0 cryptography-46.0.6 et-xmlfile-2.0.0 lxml-6.0.2 openpyxl-3.1.5 pdfminer.six-20251230 pdfplumber-0.11.9 pycparser-3.0 pypdfium2-5.6.0 python-docx-1.2.0 python-pptx-1.0.2 soupsieve-2.8.3
+
+[notice] A new release of pip is available: 25.3 -> 26.0.1
+[notice] To update, run: python.exe -m pip install --upgrade pip

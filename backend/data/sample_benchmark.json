@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is supervised learning and what are some common supervised learning algorithms?",
+    "reference_answer": "Supervised learning is a machine learning paradigm where a model is trained on labeled examples, learning to map inputs to outputs. Common algorithms include linear regression, logistic regression, support vector machines, and decision trees.",
+    "doc_ids": []
+  },
+  {
+    "question": "Who coined the term machine learning and when?",
+    "reference_answer": "Arthur Samuel coined the term machine learning in 1959.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is the backpropagation algorithm and who introduced it?",
+    "reference_answer": "Backpropagation is the standard method for training neural networks that computes the gradient of the loss function with respect to each weight using the chain rule. It was introduced by Rumelhart, Hinton, and Williams in 1986.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is overfitting in machine learning and how can it be prevented?",
+    "reference_answer": "Overfitting occurs when a model learns training data too well, including noise, resulting in poor performance on new data. It can be prevented using regularization techniques like L1 (Lasso), L2 (Ridge), dropout, and cross-validation.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is gradient descent and what are its main variants?",
+    "reference_answer": "Gradient descent is an optimization algorithm that minimizes a loss function by iteratively adjusting parameters in the direction of steepest descent. Main variants are full-batch gradient descent, stochastic gradient descent (using single examples), and mini-batch gradient descent (using small subsets). Adam optimizer is also a popular adaptive variant.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is the transformer architecture and who introduced it?",
+    "reference_answer": "The transformer architecture was introduced by Google in the 2017 paper 'Attention Is All You Need' by Vaswani and colleagues. It processes all tokens simultaneously using self-attention mechanisms rather than sequentially like recurrent networks.",
+    "doc_ids": []
+  },
+  {
+    "question": "How does the attention mechanism work in transformers?",
+    "reference_answer": "The attention mechanism computes a weighted sum of values where weights are determined by the compatibility of queries and keys using scaled dot-product attention. Multi-head attention runs this in parallel across multiple learned subspaces, allowing the model to attend to information from different positions simultaneously.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is BERT and what training objectives does it use?",
+    "reference_answer": "BERT (Bidirectional Encoder Representations from Transformers) was developed by Google AI Language in 2018. It is trained using masked language modeling (predicting randomly masked tokens) and next sentence prediction. It uses bidirectional attention to consider both left and right context simultaneously.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is Retrieval-Augmented Generation (RAG) and how does it work?",
+    "reference_answer": "RAG combines a parametric language model with a non-parametric retrieval module. During inference, the retrieval module fetches relevant documents from a knowledge base, and the language model conditions its output on both the query and retrieved documents. It was introduced by Facebook AI Research in 2020.",
+    "doc_ids": []
+  },
+  {
+    "question": "What is LoRA and what problem does it solve?",
+    "reference_answer": "LoRA (Low-Rank Adaptation) is a parameter-efficient fine-tuning method introduced by Edward Hu and colleagues at Microsoft. It adds trainable low-rank matrices to the attention layers of large models, allowing them to be fine-tuned with significantly reduced memory and compute requirements compared to full fine-tuning.",
+    "doc_ids": []
+  }
+]

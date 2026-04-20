@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./backend/data:/app/data
+      - chroma_data:/app/chroma_data
+      - graph_data:/app/graph_data
+    env_file:
+      - .env
+    environment:
+      - CHROMA_PERSIST_DIR=/app/chroma_data
+      - GRAPH_DATA_PATH=/app/graph_data/graph_data.json
+      - DATABASE_URL=sqlite:///./ragtool.db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  chroma_data:
+  graph_data:
