@@ -365,7 +365,7 @@ export function BenchmarkLab() {
               Generate from Documents
             </button>
             <button
-              className="border border-slate-300 rounded px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 disabled:opacity-50"
+              className="border border-slate-300 rounded px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50"
               onClick={handleLoadDefaultQuestions}
               disabled={loadingQuestions || generatingQuestions}
             >
@@ -386,23 +386,23 @@ export function BenchmarkLab() {
                 <span className="text-xs text-slate-400 mt-2 w-5 text-right shrink-0">{i + 1}.</span>
                 <input
                   type="text"
-                  className="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Question…"
                   value={q.question}
                   onChange={(e) => updateQuestion(i, 'question', e.target.value)}
                 />
                 <input
                   type="text"
-                  className="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Reference answer…"
                   value={q.reference_answer}
                   onChange={(e) => updateQuestion(i, 'reference_answer', e.target.value)}
                 />
                 <select
-                  className={`border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[180px] ${
+                  className={`border rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[180px] ${
                     q.doc_ids.length === 0
-                      ? 'border-amber-400 bg-amber-50 text-amber-700'
-                      : 'border-slate-300'
+                      ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                      : 'border-slate-300 dark:border-slate-600'
                   }`}
                   value={q.doc_ids[0] ?? ''}
                   onChange={(e) => updateQuestionDoc(i, e.target.value)}
@@ -416,7 +416,7 @@ export function BenchmarkLab() {
                   ))}
                 </select>
                 <button
-                  className="p-1.5 text-red-500 hover:bg-red-50 rounded shrink-0"
+                  className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded shrink-0"
                   onClick={() => removeQuestion(i)}
                 >
                   <Trash2 size={16} />
@@ -427,7 +427,7 @@ export function BenchmarkLab() {
         )}
 
         <button
-          className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
           onClick={addQuestion}
         >
           <Plus size={16} /> Add Question
@@ -435,28 +435,28 @@ export function BenchmarkLab() {
       </div>
 
       {/* Section 2: Configurations */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Configurations</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-6">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Configurations</h2>
 
         {configs.length > 0 && (
           <div className="space-y-2 mb-4">
             {configs.map((cfg, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 border border-slate-200 rounded-lg p-3"
+                className="flex items-center gap-3 border border-slate-200 dark:border-slate-700 rounded-lg p-3"
               >
                 <Badge variant="blue">{cfg.label}</Badge>
-                <span className="text-sm text-slate-600">{cfg.retrieval_mode}</span>
-                <span className="text-sm text-slate-500">{cfg.model_name}</span>
-                <span className="text-xs text-slate-500">{cfg.embed_model}</span>
-                <span className="text-xs text-slate-400">top_k={cfg.top_k}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-300">{cfg.retrieval_mode}</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{cfg.model_name}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">{cfg.embed_model}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">top_k={cfg.top_k}</span>
                 {ingestedEmbedModels.length > 0 && !ingestedEmbedModels.includes(cfg.embed_model) && (
                   <span className="text-xs text-amber-600 font-medium" title={`Documents ingested with: ${ingestedEmbedModels.join(', ')}`}>
                     ⚠ embed mismatch
                   </span>
                 )}
                 <button
-                  className="ml-auto p-1 text-red-500 hover:bg-red-50 rounded"
+                  className="ml-auto p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                   onClick={() => removeConfig(i)}
                 >
                   <Trash2 size={14} />
@@ -467,23 +467,23 @@ export function BenchmarkLab() {
         )}
 
         {/* Add config form */}
-        <div className="border border-dashed border-slate-300 rounded-lg p-3">
-          <h3 className="text-sm font-medium text-slate-700 mb-2">Add Configuration</h3>
+        <div className="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3">
+          <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">Add Configuration</h3>
           <div className="flex flex-wrap gap-2 items-end">
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-slate-500">Label</label>
+              <label className="text-xs text-slate-500 dark:text-slate-400">Label</label>
               <input
                 type="text"
-                className="border border-slate-300 rounded px-2 py-1.5 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm w-28 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g. Vector-GPT4"
                 value={newConfigLabel}
                 onChange={(e) => setNewConfigLabel(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-slate-500">Mode</label>
+              <label className="text-xs text-slate-500 dark:text-slate-400">Mode</label>
               <select
-                className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newConfigMode}
                 onChange={(e) => setNewConfigMode(e.target.value)}
               >
@@ -495,9 +495,9 @@ export function BenchmarkLab() {
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-slate-500">Model</label>
+              <label className="text-xs text-slate-500 dark:text-slate-400">Model</label>
               <select
-                className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newConfigModel}
                 onChange={(e) => setNewConfigModel(e.target.value)}
               >
@@ -510,18 +510,18 @@ export function BenchmarkLab() {
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-slate-500">
+              <label className="text-xs text-slate-500 dark:text-slate-400">
                 Embed Model
                 {ingestedEmbedModels.length > 0 && !ingestedEmbedModels.includes(newConfigEmbed) && (
                   <span className="ml-1 text-amber-600 font-normal">⚠ mismatch</span>
                 )}
               </label>
               <select
-                className={`border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`border rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   ingestedEmbedModels.length > 0 && !ingestedEmbedModels.includes(newConfigEmbed)
-                    ? 'border-amber-400 bg-amber-50'
-                    : 'border-slate-300'
-                }`}
+                    ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/30'
+                    : 'border-slate-300 dark:border-slate-600'
+                  }`}
                 value={newConfigEmbed}
                 onChange={(e) => setNewConfigEmbed(e.target.value)}
               >
@@ -540,10 +540,10 @@ export function BenchmarkLab() {
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-slate-500">Top K</label>
+              <label className="text-xs text-slate-500 dark:text-slate-400">Top K</label>
               <input
                 type="number"
-                className="border border-slate-300 rounded px-2 py-1.5 text-sm w-16 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm w-16 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newConfigTopK}
                 min={1}
                 max={20}
@@ -562,14 +562,14 @@ export function BenchmarkLab() {
       </div>
 
       {/* Section 3: Run */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Start Benchmark Run</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-6">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Start Benchmark Run</h2>
         <div className="flex gap-3 items-end">
           <div className="flex flex-col gap-1 flex-1 max-w-xs">
-            <label className="text-xs font-medium text-slate-600">Benchmark Name</label>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Benchmark Name</label>
             <input
               type="text"
-              className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Retrieval Comparison v1"
               value={benchmarkName}
               onChange={(e) => setBenchmarkName(e.target.value)}
@@ -615,8 +615,8 @@ export function BenchmarkLab() {
       </div>
 
       {/* Section 4: Runs List */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Benchmark Runs</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-6">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Benchmark Runs</h2>
         {runsError && (
           <div className="mb-3">
             <ErrorAlert message={runsError} />
@@ -642,8 +642,8 @@ export function BenchmarkLab() {
               </thead>
               <tbody>
                 {benchmarkRuns.map((run) => (
-                  <tr key={run.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-2 pr-4 text-slate-800 font-medium">{run.name}</td>
+                  <tr key={run.id} className="border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 font-medium">{run.name}</td>
                     <td className="py-2 pr-4">
                       <Badge variant={statusVariant(run.status)}>
                         {run.status === 'running' && (
@@ -678,8 +678,8 @@ export function BenchmarkLab() {
 
       {/* Section 5: Results */}
       {selectedRunId && selectedRun?.status === 'completed' && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
             Results — {selectedRun.name}
           </h2>
           {/* Metric legend */}
@@ -688,7 +688,7 @@ export function BenchmarkLab() {
             <div><span className="font-semibold text-blue-700">MRR</span> — Mean Reciprocal Rank: 1/rank of first chunk from the linked document (1.0 = first result, 0.5 = second). N/A if no document linked.</div>
             <div><span className="font-semibold text-green-700">Correctness</span> — Semantic similarity between the generated answer and the reference answer</div>
             <div><span className="font-semibold text-yellow-700">Faithfulness</span> — Fraction of the answer grounded in retrieved context (low = likely hallucinating)</div>
-            <div><span className="font-semibold text-slate-700">Ctx Precision</span> — Fraction of top-K chunks that contain keywords from the reference answer</div>
+            <div><span className="font-semibold text-slate-700 dark:text-slate-200">Ctx Precision</span> — Fraction of top-K chunks that contain keywords from the reference answer</div>
             <div><span className="font-semibold text-purple-700">Cost</span> — Estimated OpenAI API cost in USD for retrieval + generation</div>
           </div>
 
@@ -727,7 +727,7 @@ export function BenchmarkLab() {
 
                     return (
                     <tr key={q} className="border-b border-slate-100 align-top">
-                      <td className="py-2 pr-4 text-slate-700 text-xs max-w-xs">
+                      <td className="py-2 pr-4 text-slate-700 dark:text-slate-200 text-xs max-w-xs">
                         <p>{q}</p>
                         {sourceDocName && (
                           <p className="mt-0.5 text-slate-400 italic truncate max-w-[180px]" title={sourceDoc?.filename}>
@@ -741,7 +741,7 @@ export function BenchmarkLab() {
                           <td key={label} className="py-2 pr-4">
                             {r ? (
                               <div className="space-y-1">
-                                <p className="text-xs text-slate-700">
+                                <p className="text-xs text-slate-700 dark:text-slate-200">
                                   {r.answer.length > 120 ? r.answer.slice(0, 120) + '…' : r.answer}
                                 </p>
                                 <div className="flex flex-wrap gap-1 mt-1">
@@ -773,7 +773,7 @@ export function BenchmarkLab() {
                                   return (
                                     <div className="mt-1">
                                       <button
-                                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700"
+                                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-200"
                                         onClick={() => toggleChunks(key)}
                                       >
                                         {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -825,7 +825,7 @@ export function BenchmarkLab() {
 
                   {/* Summary / averages row */}
                   <tr className="border-t-2 border-slate-300 bg-slate-50">
-                    <td className="py-2 pr-4 text-slate-700 font-semibold text-xs">Averages</td>
+                    <td className="py-2 pr-4 text-slate-700 dark:text-slate-200 font-semibold text-xs">Averages</td>
                     {configLabels.map((label) => (
                       <td key={label} className="py-2 pr-4">
                         <div className="flex flex-wrap gap-1">

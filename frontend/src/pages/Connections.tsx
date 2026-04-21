@@ -143,15 +143,15 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
   useEffect(() => { fetchCard() }, [refreshKey])
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       {/* Header — always visible, click to collapse */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 transition-colors text-left"
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
       >
         <div className="flex items-center gap-2.5">
           <Bot size={16} className="text-violet-600 flex-shrink-0" />
-          <span className="font-semibold text-slate-800 text-sm">Agent Card</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Agent Card</span>
           <span className="text-xs text-slate-400">/.well-known/agent.json</span>
           {card && (
             <span className="text-xs bg-violet-50 text-violet-700 border border-violet-200 px-1.5 py-0.5 rounded font-mono">
@@ -177,7 +177,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
             <>
               {/* Identity */}
               <div className="pt-4">
-                <div className="text-sm font-semibold text-slate-800 mb-0.5">{card.name}</div>
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-0.5">{card.name}</div>
                 <p className="text-xs text-slate-500 leading-relaxed">{card.description}</p>
               </div>
 
@@ -213,7 +213,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
               <div>
                 <button
                   onClick={() => setSkillsExpanded((v) => !v)}
-                  className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-2 hover:text-slate-700 transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-2 hover:text-slate-700 dark:text-slate-200 transition-colors"
                 >
                   {skillsExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                   Skills
@@ -230,7 +230,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
                         className="border border-slate-200 rounded-lg p-3 bg-slate-50"
                       >
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <span className="text-xs font-semibold text-slate-700">{skill.name}</span>
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{skill.name}</span>
                           <div className="flex flex-wrap gap-1 justify-end">
                             {skill.tags?.map((t) => <SkillTagBadge key={t} tag={t} />)}
                           </div>
@@ -239,7 +239,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
                         {skill.examples && skill.examples.length > 0 && (
                           <div className="mt-1.5 flex flex-wrap gap-1">
                             {skill.examples.map((ex) => (
-                              <span key={ex} className="text-xs text-slate-400 italic bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                              <span key={ex} className="text-xs text-slate-400 italic bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded">
                                 "{ex}"
                               </span>
                             ))}
@@ -271,12 +271,12 @@ function ConnectionCard({ conn }: { conn: Connection }) {
   const dimmed = conn.status === 'not_configured'
 
   return (
-    <div className={`bg-white rounded-xl border shadow-sm p-5 flex flex-col gap-3 transition-opacity ${dimmed ? 'opacity-60' : ''}`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 shadow-sm p-5 flex flex-col gap-3 transition-opacity ${dimmed ? 'opacity-60' : ''}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="font-semibold text-slate-800 text-sm">{conn.name}</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{conn.name}</span>
             <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-mono">{conn.protocol}</span>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed">{conn.description}</p>
@@ -290,7 +290,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
           {conn.endpoints.map((ep) => (
             <div key={ep.label} className="flex items-center gap-2 text-xs">
               <span className="text-slate-400 w-24 flex-shrink-0">{ep.label}</span>
-              <span className="font-mono text-slate-700 truncate flex-1 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+              <span className="font-mono text-slate-700 dark:text-slate-200 truncate flex-1 bg-slate-50 px-2 py-1 rounded border border-slate-200">
                 {ep.url}
               </span>
               {ep.url.startsWith('http') && <CopyButton text={ep.url} />}
@@ -338,7 +338,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
         <div className="flex gap-4">
           {Object.entries(conn.stats).map(([k, v]) => (
             <div key={k} className="text-center">
-              <div className="text-base font-bold text-slate-800">{v.toLocaleString()}</div>
+              <div className="text-base font-bold text-slate-800 dark:text-slate-100">{v.toLocaleString()}</div>
               <div className="text-xs text-slate-400 capitalize">{k}</div>
             </div>
           ))}
@@ -454,12 +454,12 @@ function RegisteredCard({
   const tagColor = conn.type === 'a2a' ? 'bg-violet-50 text-violet-700 border-violet-200' : 'bg-blue-50 text-blue-700 border-blue-200'
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col gap-3">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="font-semibold text-slate-800 text-sm">{conn.name}</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{conn.name}</span>
             <span className={`text-xs px-1.5 py-0.5 rounded font-mono border ${conn.type === 'a2a' ? 'bg-violet-50 text-violet-700 border-violet-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
               {conn.type.toUpperCase()}
             </span>
@@ -526,7 +526,7 @@ function RegisteredCard({
             setCallResult(null)
             setCallError(null)
           }}
-          className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 border rounded-lg transition-colors ${showTest ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-300 hover:bg-slate-50 text-slate-600'}`}
+          className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 border rounded-lg transition-colors ${showTest ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600'}`}
         >
           <FlaskConical size={12} />
           {conn.type === 'mcp' && activeTool ? `Test: ${activeTool.name}` : 'Test'}
@@ -568,7 +568,7 @@ function RegisteredCard({
                 <select
                   value={selectedTool}
                   onChange={(e) => handleToolSelect(e.target.value)}
-                  className="border border-slate-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-xs bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {schemas.map((s) => (
                     <option key={s.name} value={s.name}>{s.name}</option>
@@ -596,7 +596,7 @@ function RegisteredCard({
                           <select
                             value={inputValues[key] ?? ''}
                             onChange={(e) => setInputValues((p) => ({ ...p, [key]: e.target.value }))}
-                            className="border border-slate-300 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-xs bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="">— select —</option>
                             {d.enum.map((v: string) => <option key={v} value={v}>{v}</option>)}
@@ -605,7 +605,7 @@ function RegisteredCard({
                           <select
                             value={inputValues[key] ?? ''}
                             onChange={(e) => setInputValues((p) => ({ ...p, [key]: e.target.value }))}
-                            className="border border-slate-300 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-xs bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="">— select —</option>
                             <option value="true">true</option>
@@ -649,7 +649,7 @@ function RegisteredCard({
                     <CheckCircle2 size={12} />
                     Result
                   </div>
-                  <pre className="text-xs bg-white border border-slate-200 rounded p-2 overflow-auto max-h-48 whitespace-pre-wrap break-words text-slate-700">{callResult}</pre>
+                  <pre className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-2 overflow-auto max-h-48 whitespace-pre-wrap break-words text-slate-700 dark:text-slate-200">{callResult}</pre>
                 </div>
               )}
             </>
@@ -811,7 +811,7 @@ export function Connections() {
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Connections</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Connections</h1>
           <p className="text-sm text-slate-500 mt-0.5">Protocols exposed by this lab and external services it consumes</p>
         </div>
         <button
@@ -832,7 +832,7 @@ export function Connections() {
           <section>
             <div className="flex items-center gap-2 mb-4">
               <ArrowUpFromLine size={16} className="text-violet-600" />
-              <h2 className="text-base font-semibold text-slate-700">Exposed</h2>
+              <h2 className="text-base font-semibold text-slate-700 dark:text-slate-200">Exposed</h2>
               <span className="text-xs text-slate-400">Protocols this lab offers to external agents and systems</span>
               {statusLoading && <Loader2 size={13} className="animate-spin text-slate-400 ml-1" />}
             </div>
@@ -848,13 +848,13 @@ export function Connections() {
             </div>
 
             {/* Public Access — merged URL + tunnel card */}
-            <div className="mt-4 bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-5">
+            <div className="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 space-y-5">
               {/* Header */}
               <div className="flex items-center gap-2">
                 {ngrok.running
                   ? <Wifi size={16} className="text-emerald-600" />
                   : <WifiOff size={16} className="text-slate-400" />}
-                <span className="font-semibold text-slate-800 text-sm">Public Access</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Public Access</span>
                 {ngrok.running
                   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-emerald-100 text-emerald-700 border-emerald-200"><CheckCircle2 size={12} />Tunnel active</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-slate-100 text-slate-500 border-slate-200"><AlertCircle size={12} />Local only</span>}
@@ -864,7 +864,7 @@ export function Connections() {
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-slate-700">ngrok</span>
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">ngrok</span>
                     <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-mono">HTTPS</span>
                   </div>
                   <p className="text-xs text-slate-500">
@@ -874,7 +874,7 @@ export function Connections() {
                     <div className="mt-2">
                       <div className="flex items-center gap-2 text-xs">
                         <span className="text-slate-400 flex-shrink-0 w-20">Tunnel URL</span>
-                        <span className="font-mono text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate flex-1">
+                        <span className="font-mono text-slate-700 dark:text-slate-200 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate flex-1">
                           {ngrok.url}
                         </span>
                         <CopyButton text={ngrok.url} />
@@ -910,7 +910,7 @@ export function Connections() {
           <section>
             <div className="flex items-center gap-2 mb-4">
               <ArrowDownToLine size={16} className="text-blue-600" />
-              <h2 className="text-base font-semibold text-slate-700">Consumed</h2>
+              <h2 className="text-base font-semibold text-slate-700 dark:text-slate-200">Consumed</h2>
               <span className="text-xs text-slate-400">External services and local stores this lab depends on</span>
               {statusLoading && <Loader2 size={13} className="animate-spin text-slate-400 ml-1" />}
             </div>
@@ -925,7 +925,7 @@ export function Connections() {
           <section>
             <div className="flex items-center gap-2 mb-4">
               <Plug size={16} className="text-emerald-600" />
-              <h2 className="text-base font-semibold text-slate-700">Registered Connections</h2>
+              <h2 className="text-base font-semibold text-slate-700 dark:text-slate-200">Registered Connections</h2>
               <span className="text-xs text-slate-400">External A2A agents and MCP servers you can use in the Playground</span>
             </div>
 
@@ -950,7 +950,7 @@ export function Connections() {
             {regTab === 'a2a' && (
               <div className="space-y-4">
                 {/* Registration form */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
                   <p className="text-xs font-medium text-slate-600 mb-3">Register A2A Agent</p>
                   <div className="flex flex-wrap gap-2 items-end">
                     <div className="flex flex-col gap-1 flex-1 min-w-32">
@@ -999,7 +999,7 @@ export function Connections() {
             {regTab === 'mcp' && (
               <div className="space-y-4">
                 {/* Registration form */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
                   <p className="text-xs font-medium text-slate-600 mb-3">Register MCP Server</p>
                   <div className="flex flex-wrap gap-2 items-end">
                     <div className="flex flex-col gap-1 flex-1 min-w-32">
@@ -1028,7 +1028,7 @@ export function Connections() {
                             key={t}
                             type="button"
                             onClick={() => setMcpTransport(t)}
-                            className={`px-2.5 py-1.5 transition-colors ${mcpTransport === t ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                            className={`px-2.5 py-1.5 transition-colors ${mcpTransport === t ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
                           >
                             {t === 'sse' ? 'SSE' : 'Streamable HTTP'}
                           </button>

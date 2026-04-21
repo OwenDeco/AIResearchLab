@@ -64,8 +64,8 @@ function filterByDateStr<T extends { date: string }>(rows: T[], range: DateRange
 
 function KPIBox({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col gap-1">
-      <span className="text-2xl font-bold text-slate-800">{value}</span>
+    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex flex-col gap-1">
+      <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</span>
       <span className="text-xs text-slate-500">{label}</span>
     </div>
   )
@@ -73,8 +73,8 @@ function KPIBox({ label, value }: { label: string; value: string | number }) {
 
 function Card({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-      {title && <h2 className="text-sm font-semibold text-slate-700 mb-3">{title}</h2>}
+    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+      {title && <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">{title}</h2>}
       {children}
     </div>
   )
@@ -94,8 +94,8 @@ function TabButton({
       onClick={onClick}
       className={`px-4 py-2 text-sm rounded-md border transition-colors ${
         active
-          ? 'bg-white border-slate-200 text-slate-800 font-medium shadow-sm'
-          : 'border-transparent text-slate-500 hover:text-slate-700'
+          ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium shadow-sm'
+          : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-200'
       }`}
     >
       {label}
@@ -209,8 +209,8 @@ function QueriesTab({
                 </thead>
                 <tbody>
                   {by_mode.map((row) => (
-                    <tr key={row.mode} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="py-2 pr-4 text-slate-800 font-medium">{row.mode}</td>
+                    <tr key={row.mode} className="border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700">
+                      <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 font-medium">{row.mode}</td>
                       <td className="py-2 pr-4 text-right text-slate-600">{row.count}</td>
                       <td className="py-2 pr-4 text-right text-slate-600">{row.avg_latency_ms.toFixed(0)} ms</td>
                       <td className="py-2 pr-4 text-right text-slate-600">${row.avg_cost_usd.toFixed(4)}</td>
@@ -228,7 +228,7 @@ function QueriesTab({
             {(['p50', 'p90', 'p99'] as const).map((p) => (
               <div key={p} className="flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-600 uppercase">{p}</span>
-                <span className="text-xl font-bold text-slate-800">
+                <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
                   {latency_percentiles[p].toLocaleString()} ms
                 </span>
               </div>
@@ -237,7 +237,7 @@ function QueriesTab({
           <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
             <span className="text-xs text-slate-500">Export runs as CSV</span>
             <button
-              className="border border-slate-300 rounded px-3 py-1 text-xs text-slate-700 hover:bg-slate-50"
+              className="border border-slate-300 rounded px-3 py-1 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
               onClick={() => downloadCSV(runs)}
             >
               Export CSV
@@ -338,8 +338,8 @@ function ConnectionsTab({
                 const total = row.inbound + row.outbound
                 const rate = total > 0 ? ((row.errors / total) * 100).toFixed(1) : '0.0'
                 return (
-                  <tr key={row.name} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-2 pr-4 text-slate-800 font-medium">{row.name}</td>
+                  <tr key={row.name} className="border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 font-medium">{row.name}</td>
                     <td className="py-2 pr-4 text-slate-500">{row.type || '—'}</td>
                     <td className="py-2 pr-4 text-right text-slate-600">{row.inbound}</td>
                     <td className="py-2 pr-4 text-right text-slate-600">{row.outbound}</td>
@@ -609,7 +609,7 @@ function PlatformTab({
                     {SYSTEM_EVENT_ICONS[ev.event_type] ?? '•'}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <span className="text-slate-700">{ev.summary}</span>
+                    <span className="text-slate-700 dark:text-slate-200">{ev.summary}</span>
                   </div>
                   <span className="text-xs text-slate-400 shrink-0 whitespace-nowrap">
                     {new Date(ev.timestamp).toLocaleString()}
@@ -671,7 +671,7 @@ export function Analytics() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Analytics</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Analytics</h1>
 
       {error && (
         <div className="mb-4">
@@ -716,7 +716,7 @@ export function Analytics() {
 
       {/* Tab content */}
       {summary === null ? (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8 text-center">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-8 text-center">
           <p className="text-slate-500">No analytics data available yet.</p>
         </div>
       ) : (

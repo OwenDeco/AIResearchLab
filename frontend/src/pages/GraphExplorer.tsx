@@ -414,7 +414,7 @@ export function GraphExplorer() {
                 </button>
                 {searchResult && (
                   <button
-                    className="text-sm text-slate-500 hover:text-slate-700"
+                    className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-200"
                     onClick={clearSearch}
                   >
                     Clear
@@ -426,7 +426,7 @@ export function GraphExplorer() {
             {/* Graph canvas */}
             <div
               ref={containerRef}
-              className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden"
+              className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
               style={{ height: 600 }}
             >
               <React.Suspense
@@ -461,8 +461,8 @@ export function GraphExplorer() {
           {/* Right panel (30%) */}
           <div className="w-72 flex-shrink-0 space-y-4">
             {/* Clear graph */}
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-slate-700 mb-2">Actions</h3>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Actions</h3>
               <button
                 className="w-full bg-red-600 hover:bg-red-700 text-white rounded px-3 py-1.5 text-sm disabled:opacity-50 flex items-center justify-center gap-1"
                 onClick={handleClearGraph}
@@ -476,20 +476,20 @@ export function GraphExplorer() {
 
             {/* Stats */}
             {stats && (
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Graph Statistics</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Graph Statistics</h3>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Nodes</span>
-                    <span className="text-slate-800 font-medium">{stats.node_count}</span>
+                    <span className="text-slate-800 dark:text-slate-100 font-medium">{stats.node_count}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Edges</span>
-                    <span className="text-slate-800 font-medium">{stats.edge_count}</span>
+                    <span className="text-slate-800 dark:text-slate-100 font-medium">{stats.edge_count}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Documents</span>
-                    <span className="text-slate-800 font-medium">{stats.doc_count}</span>
+                    <span className="text-slate-800 dark:text-slate-100 font-medium">{stats.doc_count}</span>
                   </div>
                 </div>
                 {stats.top_entities && stats.top_entities.length > 0 && (
@@ -515,9 +515,9 @@ export function GraphExplorer() {
             )}
 
             {/* Node type legend */}
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-slate-700">Node Types</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Node Types</h3>
                 <button
                   className="text-xs text-blue-600 hover:underline"
                   onClick={() => openConfig('types')}
@@ -549,9 +549,9 @@ export function GraphExplorer() {
 
             {/* Graph config panel (tabbed) */}
             {showConfig && (
-              <div className="bg-white rounded-lg border border-blue-300 shadow-sm p-4">
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-blue-300 dark:border-blue-700 shadow-sm p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-slate-700">Graph Config</h3>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Graph Config</h3>
                   <button className="text-xs text-slate-400 hover:text-slate-600" onClick={() => setShowConfig(false)}>✕</button>
                 </div>
 
@@ -563,7 +563,7 @@ export function GraphExplorer() {
                       className={`text-xs px-3 py-1.5 font-medium border-b-2 transition-colors ${
                         configTab === tab
                           ? 'border-blue-600 text-blue-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-700'
+                          : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-200'
                       }`}
                       onClick={() => setConfigTab(tab)}
                     >
@@ -585,7 +585,7 @@ export function GraphExplorer() {
                             className="w-6 h-6 rounded cursor-pointer border-0 p-0"
                             title="Pick color"
                           />
-                          <span className="text-xs text-slate-700 flex-1">{name}</span>
+                          <span className="text-xs text-slate-700 dark:text-slate-200 flex-1">{name}</span>
                           <button
                             className="text-xs text-red-400 hover:text-red-600"
                             onClick={() => removeEditingType(name)}
@@ -611,7 +611,7 @@ export function GraphExplorer() {
                         onKeyDown={(e) => e.key === 'Enter' && addEditingType()}
                       />
                       <button
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 rounded px-2 py-1 text-xs"
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded px-2 py-1 text-xs"
                         onClick={addEditingType}
                       >Add</button>
                     </div>
@@ -646,7 +646,7 @@ export function GraphExplorer() {
                             }
                           />
                           <div className="min-w-0">
-                            <span className="text-xs font-mono text-slate-800">{p.name}</span>
+                            <span className="text-xs font-mono text-slate-800 dark:text-slate-100">{p.name}</span>
                             {p.description && (
                               <p className="text-xs text-slate-400 leading-tight">{p.description}</p>
                             )}
@@ -682,7 +682,7 @@ export function GraphExplorer() {
                     <div className="space-y-4 mb-3">
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <label className="text-xs font-medium text-slate-700">Min Confidence</label>
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Min Confidence</label>
                           <span className="text-xs font-mono text-slate-600">{editingConfig.min_confidence.toFixed(2)}</span>
                         </div>
                         <input
@@ -704,7 +704,7 @@ export function GraphExplorer() {
                           onChange={(e) => setEditingConfig((c) => ({ ...c, preprocess_text: e.target.checked }))}
                         />
                         <div>
-                          <span className="text-xs font-medium text-slate-700">Preprocess text</span>
+                          <span className="text-xs font-medium text-slate-700 dark:text-slate-200">Preprocess text</span>
                           <p className="text-xs text-slate-400">Strip HTML tags, normalize whitespace and quotes before extraction.</p>
                         </div>
                       </label>
@@ -727,12 +727,12 @@ export function GraphExplorer() {
 
             {/* Selected node */}
             {selectedNode && (
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-2">Selected Node</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Selected Node</h3>
                 <div className="space-y-1 text-sm">
                   <div>
                     <span className="text-slate-500 text-xs">Label</span>
-                    <p className="text-slate-800 font-medium">{selectedNode.label}</p>
+                    <p className="text-slate-800 dark:text-slate-100 font-medium">{selectedNode.label}</p>
                   </div>
                   <div>
                     <span className="text-slate-500 text-xs">Type</span>
@@ -741,13 +741,13 @@ export function GraphExplorer() {
                         className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                         style={{ backgroundColor: typeColorMap[selectedNode.type] ?? '#94a3b8' }}
                       />
-                      <span className="text-xs text-slate-700">{selectedNode.type}</span>
+                      <span className="text-xs text-slate-700 dark:text-slate-200">{selectedNode.type}</span>
                     </p>
                   </div>
                   {selectedNode.chunk_ids && (
                     <div>
                       <span className="text-slate-500 text-xs">Chunks</span>
-                      <p className="text-slate-800">{selectedNode.chunk_ids.length}</p>
+                      <p className="text-slate-800 dark:text-slate-100">{selectedNode.chunk_ids.length}</p>
                     </div>
                   )}
                   {selectedNode.doc_ids && selectedNode.doc_ids.length > 0 && (
@@ -771,10 +771,10 @@ export function GraphExplorer() {
 
             {/* Selected edge */}
             {selectedEdge && (
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-2">Selected Edge</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Selected Edge</h3>
                 <div className="text-sm space-y-1">
-                  <p className="text-slate-800">
+                  <p className="text-slate-800 dark:text-slate-100">
                     <span className="font-medium">
                       {typeof selectedEdge.source === 'object'
                         ? (selectedEdge.source as FGNode).label
