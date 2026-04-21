@@ -325,7 +325,7 @@ export function Playground() {
           )}
 
           {loading && (
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex items-center justify-center h-64">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex items-center justify-center h-64">
               <div className="flex flex-col items-center gap-3">
                 <Spinner size="lg" />
                 <p className="text-slate-500 text-sm">Running query…</p>
@@ -336,7 +336,7 @@ export function Playground() {
           {!loading && result && (
             <div className="space-y-4">
               {/* Answer */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-slate-800">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-slate-800 dark:text-slate-100">
                 <h3 className="font-semibold text-blue-900 mb-2 text-sm">Answer</h3>
                 <p className="text-sm whitespace-pre-wrap">{result.answer}</p>
               </div>
@@ -353,8 +353,8 @@ export function Playground() {
 
               {/* Stage timings */}
               {result.stage_timings && Object.keys(result.stage_timings).length > 0 && (
-                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                  <h3 className="text-sm font-semibold text-slate-700 mb-2">Stage Timings</h3>
+                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Stage Timings</h3>
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-100">
@@ -365,7 +365,7 @@ export function Playground() {
                     <tbody>
                       {Object.entries(result.stage_timings).map(([stage, ms]) => (
                         <tr key={stage} className="border-b border-slate-50">
-                          <td className="py-1 text-slate-700">{stage}</td>
+                          <td className="py-1 text-slate-700 dark:text-slate-200">{stage}</td>
                           <td className="py-1 text-right text-slate-600 font-mono">
                             {Number(ms).toFixed(1)}
                           </td>
@@ -413,8 +413,8 @@ export function Playground() {
 
               {/* Retrieved contexts */}
               {result.contexts && result.contexts.length > 0 && (
-                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
                     Retrieved Contexts ({result.contexts.length})
                   </h3>
                   <div className="space-y-3">
@@ -428,7 +428,7 @@ export function Playground() {
           )}
 
           {!loading && !result && !error && (
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8 flex items-center justify-center text-slate-400 text-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-8 flex items-center justify-center text-slate-400 text-sm">
               Results will appear here after running a query.
             </div>
           )}

@@ -334,7 +334,7 @@ export function Settings() {
 
       <div className="space-y-4">
         {/* OpenAI */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-slate-800">OpenAI</h2>
             <StatusBadge active={openaiActive} />
@@ -360,7 +360,7 @@ export function Settings() {
         </div>
 
         {/* Azure OpenAI */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-slate-800">Azure OpenAI</h2>
             <StatusBadge active={azureActive} />
@@ -403,7 +403,7 @@ export function Settings() {
         </div>
 
         {/* Ollama */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-slate-800">Ollama</h2>
             <StatusBadge active={ollamaActive} />
@@ -458,7 +458,7 @@ export function Settings() {
       {/* ------------------------------------------------------------------ */}
       <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mt-10 mb-3">Agent</p>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 space-y-4">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5 space-y-4">
 
         {/* Model selector */}
         <Field
@@ -529,7 +529,7 @@ export function Settings() {
 
       <div className="space-y-4">
         {/* LLMs */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">LLM models</h3>
           <div className="space-y-1 mb-3">
             {customLlms.length === 0 && (
@@ -584,7 +584,7 @@ export function Settings() {
         </div>
 
         {/* Embedding models */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Embedding models</h3>
           <div className="space-y-1 mb-3">
             {customEmbeds.length === 0 && (

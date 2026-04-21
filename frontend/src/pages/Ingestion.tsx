@@ -487,7 +487,7 @@ export function Ingestion() {
                   ) : (
                     <XCircle size={14} className="text-red-500 flex-shrink-0" />
                   )}
-                  <span className="flex-1 truncate text-slate-700">{f.name}</span>
+                  <span className="flex-1 truncate text-slate-700 dark:text-slate-200">{f.name}</span>
                   {status?.message && (
                     <span className={`text-xs flex-shrink-0 ${status.status === 'error' ? 'text-red-500' : 'text-green-600'}`}>
                       {status.message}
@@ -520,14 +520,14 @@ export function Ingestion() {
       </div>
 
       {/* Sample Set */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm mb-6">
         <button
           className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors rounded-lg"
           onClick={() => setSamplesOpen((v) => !v)}
         >
           <div className="flex items-center gap-2">
             <FlaskConical size={18} className="text-violet-600" />
-            <span className="text-base font-semibold text-slate-800">Sample Dataset</span>
+            <span className="text-base font-semibold text-slate-800 dark:text-slate-100">Sample Dataset</span>
             <span className="text-xs text-slate-400 font-normal">
               {samples.length > 0 ? `${samples.length} files available` : 'Load research papers & reference docs'}
             </span>
@@ -593,7 +593,7 @@ export function Ingestion() {
                           }}
                         />
                         <FileText size={13} className="text-slate-400 flex-shrink-0" />
-                        <span className="flex-1 text-sm text-slate-700 truncate" title={s.filename}>
+                        <span className="flex-1 text-sm text-slate-700 dark:text-slate-200 truncate" title={s.filename}>
                           {s.filename}
                         </span>
                         <span className="text-xs text-slate-400 flex-shrink-0">{fmtBytes(s.size_bytes)}</span>
@@ -640,9 +640,9 @@ export function Ingestion() {
       </div>
 
       {/* Documents table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-slate-800">Documents</h2>
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Documents</h2>
           {documents.some(d => !d.graph_extracted && !(d.id in extractProgress)) && (
             <button
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -690,7 +690,7 @@ export function Ingestion() {
                     }`}
                     onClick={() => selectDoc(doc)}
                   >
-                    <td className="py-2 pr-4 text-slate-800 font-medium">{doc.filename}</td>
+                    <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 font-medium">{doc.filename}</td>
                     <td className="py-2 pr-4 text-slate-600">
                       <Badge variant="gray">{doc.file_type}</Badge>
                     </td>
@@ -780,8 +780,8 @@ export function Ingestion() {
 
       {/* Chunk Inspector */}
       {selectedDoc && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
             Chunks — {selectedDoc.filename}
           </h2>
 
@@ -802,7 +802,7 @@ export function Ingestion() {
                         chars {chunk.start_char}–{chunk.end_char}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-700 mb-2">
+                    <p className="text-sm text-slate-700 dark:text-slate-200 mb-2">
                       {chunk.content.length > 200
                         ? chunk.content.slice(0, 200) + '…'
                         : chunk.content}
@@ -819,7 +819,7 @@ export function Ingestion() {
               {/* Pagination */}
               <div className="flex items-center gap-3">
                 <button
-                  className="border border-slate-300 rounded px-3 py-1 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="border border-slate-300 rounded px-3 py-1 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
                   disabled={chunkPage === 0}
                   onClick={() => setChunkPage((p) => p - 1)}
                 >
@@ -829,7 +829,7 @@ export function Ingestion() {
                   Page {chunkPage + 1} of {Math.max(1, totalPages)}
                 </span>
                 <button
-                  className="border border-slate-300 rounded px-3 py-1 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="border border-slate-300 rounded px-3 py-1 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
                   disabled={chunkPage >= totalPages - 1}
                   onClick={() => setChunkPage((p) => p + 1)}
                 >

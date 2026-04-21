@@ -107,16 +107,16 @@ export function OrchestrationSimulator() {
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Pixel Orchestration Simulator</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Pixel Orchestration Simulator</h1>
           <p className="text-sm text-slate-600 mt-1">
             Live mode simulates runtime orchestration events. Replay mode lets you inspect timeline snapshots.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white p-2">
+        <div className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-2">
           <button
             className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm ${
-              mode === 'live' ? 'bg-cyan-600 text-white' : 'bg-slate-100 text-slate-700'
+              mode === 'live' ? 'bg-cyan-600 text-white' : 'bg-slate-100 text-slate-700 dark:text-slate-200'
             }`}
             onClick={() => setMode('live')}
           >
@@ -124,7 +124,7 @@ export function OrchestrationSimulator() {
           </button>
           <button
             className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm ${
-              mode === 'replay' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700'
+              mode === 'replay' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 dark:text-slate-200'
             }`}
             onClick={switchToReplay}
             disabled={history.length === 0}
@@ -144,7 +144,7 @@ export function OrchestrationSimulator() {
           />
 
           {mode === 'replay' && history.length > 0 && (
-            <div className="rounded-lg border border-slate-200 bg-white p-3">
+            <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
               <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
                 <span>Timeline frame {replayIndex + 1} / {history.length}</span>
                 <span>{new Date(history[replayIndex].createdAt).toLocaleTimeString()}</span>
@@ -159,7 +159,7 @@ export function OrchestrationSimulator() {
               />
               <div className="mt-2 flex gap-2">
                 <button
-                  className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-700"
+                  className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200"
                   onClick={() => setIsReplayPlaying((v) => !v)}
                 >
                   {isReplayPlaying ? <Pause size={14} className="inline mr-1" /> : <Play size={14} className="inline mr-1" />}
@@ -170,27 +170,27 @@ export function OrchestrationSimulator() {
           )}
         </div>
 
-        <aside className="rounded-xl border border-slate-300 bg-white p-4 h-fit">
-          <h2 className="text-lg font-semibold text-slate-800">Agent Runtime Panel</h2>
+        <aside className="rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-4 h-fit">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Agent Runtime Panel</h2>
           <p className="text-xs text-slate-500 mt-1">Select an agent sprite to inspect its current context.</p>
 
           <div className="mt-4 space-y-3">
             <div className="rounded-md bg-slate-100 p-3">
               <p className="text-xs uppercase tracking-wide text-slate-500">Agent</p>
-              <p className="font-semibold text-slate-800">{selectedAgent.name}</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-100">{selectedAgent.name}</p>
             </div>
             <div className="rounded-md bg-slate-100 p-3">
               <p className="text-xs uppercase tracking-wide text-slate-500">Current task</p>
-              <p className="text-sm text-slate-800">{selectedAgent.currentTask}</p>
+              <p className="text-sm text-slate-800 dark:text-slate-100">{selectedAgent.currentTask}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-md bg-slate-100 p-3">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Status</p>
-                <p className="text-sm font-semibold text-slate-800">{selectedAgent.status}</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{selectedAgent.status}</p>
               </div>
               <div className="rounded-md bg-slate-100 p-3">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Latency</p>
-                <p className="text-sm font-semibold text-slate-800">{selectedAgent.latencyMs} ms</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{selectedAgent.latencyMs} ms</p>
               </div>
             </div>
 
@@ -202,7 +202,7 @@ export function OrchestrationSimulator() {
                     <p className="text-[11px] text-slate-500 flex items-center gap-1">
                       <Clock3 size={11} /> {new Date(log.at).toLocaleTimeString()}
                     </p>
-                    <p className="text-xs text-slate-700">{log.message}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-200">{log.message}</p>
                   </div>
                 ))}
               </div>

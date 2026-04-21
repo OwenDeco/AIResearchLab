@@ -79,7 +79,7 @@ function DomainBadge({ domain }: { domain: string }) {
     orange: 'bg-orange-50 text-orange-700 border-orange-200',
     teal: 'bg-teal-50 text-teal-700 border-teal-200',
     rose: 'bg-rose-50 text-rose-700 border-rose-200',
-    slate: 'bg-slate-50 text-slate-700 border-slate-200',
+    slate: 'bg-slate-50 text-slate-700 dark:text-slate-200 border-slate-200',
   }
   return (
     <span className={`inline-flex items-center text-xs font-medium border rounded-full px-2 py-0.5 ${classes[c] || classes.slate}`}>
@@ -139,7 +139,7 @@ function RunDetail({ run, steps, events }: { run: UnifiedRun; steps: RunStep[]; 
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Run Summary</p>
         {run.summary?.name && (
-          <p className="text-sm font-semibold text-slate-700 mb-2">{run.summary.name}</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">{run.summary.name}</p>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {(
@@ -150,14 +150,14 @@ function RunDetail({ run, steps, events }: { run: UnifiedRun; steps: RunStep[]; 
               ['Errors', run.summary?.error_count ?? '—'],
             ] as [string, string | number][]
           ).map(([label, value]) => (
-            <div key={label} className="bg-white border border-slate-200 rounded-lg p-3">
+            <div key={label} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
               <p className="text-xs text-slate-400 mb-0.5">{label}</p>
-              <p className="text-sm font-semibold text-slate-700 font-mono">{value}</p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 font-mono">{value}</p>
             </div>
           ))}
         </div>
         {run.summary?.final_output && (
-          <div className="mt-2 bg-white border border-slate-200 rounded-lg p-3">
+          <div className="mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
             <p className="text-xs text-slate-400 mb-1">Output preview</p>
             <p className="text-xs text-slate-600 line-clamp-2">{run.summary.final_output}</p>
           </div>
@@ -170,9 +170,9 @@ function RunDetail({ run, steps, events }: { run: UnifiedRun; steps: RunStep[]; 
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Steps Timeline</p>
           <div className="space-y-1.5">
             {steps.map(step => (
-              <div key={step.id} className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-3 py-2">
+              <div key={step.id} className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2">
                 <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${STEP_COLORS[step.step_type] || 'bg-slate-400'}`} />
-                <span className="text-xs font-mono text-slate-700 w-32 flex-shrink-0">{step.step_type.replace('_', ' ')}</span>
+                <span className="text-xs font-mono text-slate-700 dark:text-slate-200 w-32 flex-shrink-0">{step.step_type.replace('_', ' ')}</span>
                 {step.component && <span className="text-xs text-slate-400 font-mono">{step.component}</span>}
                 <div className="flex-1 mx-2">
                   {step.duration_ms != null && (
@@ -200,7 +200,7 @@ function RunDetail({ run, steps, events }: { run: UnifiedRun; steps: RunStep[]; 
       {events.length > 0 && (
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Events</p>
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
@@ -294,18 +294,18 @@ export function Runs() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-1">Runs</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Runs</h1>
       <p className="text-sm text-slate-500 mb-6">All runs across domains — retrieval, evaluation, agent sessions, and connections.</p>
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         {/* Domain tabs */}
-        <div className="flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+        <div className="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm">
           {['all', 'orchestration', 'evaluation', 'interoperability', 'context_engineering', 'governance'].map(d => (
             <button
               key={d}
               onClick={() => setDomainFilter(d)}
-              className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${domainFilter === d ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${domainFilter === d ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             >
               {d === 'all' ? 'All' : d.replace('_', ' ')}
             </button>
@@ -314,7 +314,7 @@ export function Runs() {
 
         {/* Type select */}
         <select
-          className="border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-700 bg-white shadow-sm focus:outline-none"
+          className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 shadow-sm focus:outline-none"
           value={typeFilter}
           onChange={e => setTypeFilter(e.target.value)}
         >
@@ -328,7 +328,7 @@ export function Runs() {
 
         {/* Status select */}
         <select
-          className="border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-700 bg-white shadow-sm focus:outline-none"
+          className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 shadow-sm focus:outline-none"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
         >
@@ -346,7 +346,7 @@ export function Runs() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-32"><Spinner size="lg" /></div>
         ) : runs.length === 0 ? (
@@ -405,7 +405,7 @@ function RunRows({
   return (
     <>
       <tr
-        className={`border-b border-slate-100 cursor-pointer transition-colors ${expanded ? 'bg-slate-50' : 'hover:bg-slate-50'}`}
+        className={`border-b border-slate-100 cursor-pointer transition-colors ${expanded ? 'bg-slate-50' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}
         onClick={onToggle}
       >
         <td className="px-4 py-2.5"><DomainBadge domain={run.primary_domain} /></td>
