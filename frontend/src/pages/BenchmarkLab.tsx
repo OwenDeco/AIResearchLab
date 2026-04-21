@@ -278,7 +278,7 @@ export function BenchmarkLab() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Benchmark Lab</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Benchmark Lab</h1>
         <button
           onClick={() => setShowHelp(true)}
           className="text-slate-400 hover:text-blue-600 transition-colors"
@@ -291,25 +291,25 @@ export function BenchmarkLab() {
       {/* Help modal */}
       {showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-800">How the Benchmark Works</h2>
-              <button onClick={() => setShowHelp(false)} className="text-slate-400 hover:text-slate-600">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">How the Benchmark Works</h2>
+              <button onClick={() => setShowHelp(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                 <X size={20} />
               </button>
             </div>
-            <div className="p-5 space-y-4 text-sm text-slate-700">
+            <div className="p-5 space-y-4 text-sm text-slate-700 dark:text-slate-200">
               <p>
                 The benchmark answers one core question: <strong>"Given a question I know the answer to, how well does each retrieval strategy find the right information?"</strong>
               </p>
 
               <div>
-                <h3 className="font-semibold text-slate-800 mb-1">The Setup</h3>
+                <h3 className="font-semibold text-slate-800 dark:text-white mb-1">The Setup</h3>
                 <p>You define a <strong>question set</strong> — questions generated from your ingested documents, each linked to the source document — and one or more <strong>configurations</strong> (retrieval mode + LLM + embed model) to compare against each other.</p>
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-800 mb-2">What happens per question × config</h3>
+                <h3 className="font-semibold text-slate-800 dark:text-white mb-2">What happens per question × config</h3>
                 <ol className="space-y-2 list-decimal list-inside">
                   <li><strong>Retrieval</strong> — runs the configured strategy and fetches the top-K chunks from your documents.</li>
                   <li><strong>Generation</strong> — feeds those chunks as context to the LLM and asks it to answer the question.</li>
@@ -319,17 +319,17 @@ export function BenchmarkLab() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-800 mb-2">Metrics explained</h3>
+                <h3 className="font-semibold text-slate-800 dark:text-white mb-2">Metrics explained</h3>
                 <div className="space-y-1.5">
                   <div className="flex gap-2"><span className="font-medium text-green-700 w-28 shrink-0">Hit@K</span><span>Did any of the top-K chunks come from the correct document? Binary: 1 (hit) or 0 (miss). Requires a linked document.</span></div>
                   <div className="flex gap-2"><span className="font-medium text-blue-700 w-28 shrink-0">MRR</span><span>Mean Reciprocal Rank — at what position did the first correct chunk appear? Rank 1 = 1.0, rank 2 = 0.5, rank 3 = 0.33. Requires a linked document.</span></div>
                   <div className="flex gap-2"><span className="font-medium text-green-700 w-28 shrink-0">Correctness</span><span>Cosine similarity between the generated answer and the reference answer. Measures whether the answer means the same thing as the expected answer.</span></div>
                   <div className="flex gap-2"><span className="font-medium text-yellow-700 w-28 shrink-0">Faithfulness</span><span>Fraction of the answer's keywords that appear in the retrieved chunks. Low score means the LLM hallucinated content not in the retrieved context.</span></div>
-                  <div className="flex gap-2"><span className="font-medium text-slate-700 w-28 shrink-0">Ctx Precision</span><span>Fraction of retrieved chunks that share keywords with the reference answer. Measures whether retrieval returned relevant chunks or noise.</span></div>
+                  <div className="flex gap-2"><span className="font-medium text-slate-700 dark:text-slate-200 w-28 shrink-0">Ctx Precision</span><span>Fraction of retrieved chunks that share keywords with the reference answer. Measures whether retrieval returned relevant chunks or noise.</span></div>
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-800">
+              <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded p-3 text-xs text-amber-800 dark:text-amber-200">
                 <strong>Important:</strong> Hit@K and MRR only work when questions are linked to a source document. Use <em>Generate from Documents</em> to create questions automatically — they will be linked to the correct document.
               </div>
             </div>
@@ -338,18 +338,18 @@ export function BenchmarkLab() {
       )}
 
       {/* Section 1: Question Set */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <h2 className="text-xl font-semibold text-slate-800">Question Set</h2>
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-white">Question Set</h2>
           <div className="flex items-center gap-2 flex-wrap">
             {generateError && (
               <span className="text-xs text-red-600">{generateError}</span>
             )}
             <div className="flex items-center gap-1">
-              <label className="text-xs text-slate-500">Count</label>
+              <label className="text-xs text-slate-500 dark:text-slate-400">Count</label>
               <input
                 type="number"
-                className="border border-slate-300 rounded px-2 py-1 text-sm w-16 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm w-16 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 value={generateCount}
                 min={1}
                 max={50}
@@ -376,7 +376,7 @@ export function BenchmarkLab() {
         </div>
 
         {questionSet.length === 0 ? (
-          <p className="text-slate-500 text-sm mb-3">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">
             No questions. Load defaults or add manually.
           </p>
         ) : (

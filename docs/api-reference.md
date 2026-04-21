@@ -396,6 +396,138 @@ Generate questions from ingested documents using the LLM.
 
 ---
 
+## Unified Runs
+
+### GET /api/unified-runs
+List unified runs across all domains.
+
+**Query params:**
+| Param | Type | Default | Description |
+|---|---|---|---|
+| domain | string | — | Filter by: orchestration, evaluation, interoperability, context_engineering, governance |
+| run_type | string | — | Filter by: runtime_test, retrieval_test, benchmark_run, connection_test, agent_session |
+| status | string | — | Filter by: running, completed, failed |
+| limit | int | 50 | Max results |
+| offset | int | 0 | Pagination offset |
+
+**Response:** `{"runs": [UnifiedRunOut], "total": int}`
+
+Each `UnifiedRunOut`:
+```json
+{
+  "id": "uuid",
+  "parent_run_id": null,
+  "primary_domain": "orchestration",
+  "run_type": "runtime_test",
+  "initiated_by": "user",
+  "status": "completed",
+  "started_at": "2026-04-20T14:30:00",
+  "ended_at": "2026-04-20T14:30:02",
+  "source_id": "run-uuid",
+  "source_table": "runs",
+  "summary": {
+    "name": "My Benchmark",
+    "total_latency_ms": 1234,
+    "total_tokens": 500,
+    "total_cost_usd": 0.0012,
+    "step_count": 2,
+    "final_output": "The answer is..."
+  }
+}
+```
+
+---
+
+### GET /api/unified-runs/{run_id}
+Get a single unified run by ID. Returns 404 if not found.
+
+---
+
+### GET /api/unified-runs/{run_id}/steps
+Get all RunStep records for a run, ordered by `started_at`.
+
+**Response:** `{"steps": [RunStepOut]}`
+
+Each `RunStepOut`:
+```json
+{
+  "id": "uuid",
+  "run_id": "uuid",
+  "domain": "orchestration",
+  "step_type": "retrieve_chunks",
+  "component": "vector",
+  "started_at": "...",
+  "ended_at": "...",
+  "duration_ms": 450,
+  "status": "completed",
+  "metrics": {"chunk_count": 5, "cost_usd": null},
+  "input_summary": "Query: what is...",
+  "output_summary": "5 chunks retrieved"
+}
+```
+
+Step types: `retrieve_chunks`, `llm_call`, `tool_call`, `agent_handoff`, `score_answer`, `embed_query`, `api_request`
+
+---
+
+### GET /api/unified-runs/{run_id}/events
+Get all RunEvent records for a run, ordered by `timestamp`.
+
+**Response:** `{"events": [RunEventOut]}`
+
+Each `RunEventOut`:
+```json
+{
+  "id": "uuid",
+  "run_id": "uuid",
+  "step_id": null,
+  "event_type": "llm_called",
+  "category": "ai",
+  "severity": "info",
+  "timestamp": "...",
+  "payload": {"model": "openai/gpt-4o", "prompt_tokens": 200},
+  "summary": "LLM call to openai/gpt-4o: 200+150 tokens",
+  "source": "retrieval"
+}
+```
+
+Event categories: `execution` | `data` | `ai` | `connection` | `evaluation` | `governance`
+
+Event types (examples): `started`, `completed`, `failed`, `chunk_selected`, `llm_called`, `a2a_sent`, `a2a_received`, `mcp_called`, `score_computed`
+
+---
+
+## Analytics
+
+### GET /api/analytics/system-costs
+List stored system cost entries (e.g. Claude Code CLI sessions).
+
+**Response:** Array of `{id, date, description, model, prompt_tokens, completion_tokens, cost_usd}`
+
+---
+
+### POST /api/analytics/system-costs
+Add a system cost entry.
+
+**Body:**
+```json
+{
+  "date": "2026-04-20",
+  "description": "Claude Code session abc12345",
+  "model": "claude-sonnet-4-6",
+  "prompt_tokens": 45000,
+  "completion_tokens": 8000,
+  "cost_usd": 0.255
+}
+```
+
+---
+
+### DELETE /api/analytics/system-costs/{entry_id}
+Remove a system cost entry by ID.
+
+---
+
 ## Connections
 
 ### GET /api/connections
@@ -663,7 +795,9 @@ Return recent connection log entries, newest first.
 
 **Query params:** `limit` (default 200, max 1000), `direction` (`inbound`/`outbound`/`system`), `event_type`
 
-**Response:** array of `{id, timestamp, event_type, direction, connection_type, connection_name, connection_id, caller, summary, details}`
+**Response:** array of `{id, timestamp, event_type, direction, connection_type, connection_name, connection_id, caller, summary, details, run_id}`
+
+> **Note:** Each entry includes a `run_id` field (nullable string) linking to the associated `UnifiedRun`, if one was created for that event.
 
 **Event types:**
 | event_type | direction | Source |
@@ -714,6 +848,20 @@ Get provider settings (API keys, endpoints).
 
 ### PUT /api/settings
 Save provider settings.
+
+### GET /api/settings/provider-notes
+Get user-editable notes for each provider.
+
+**Response:** `{"openai": "...", "azure": "...", "ollama": "..."}`
+
+---
+
+### PUT /api/settings/provider-notes
+Save provider notes.
+
+**Body:** `{"openai": "...", "azure": "...", "ollama": "..."}`
+
+---
 
 ### GET /api/graph/entity-types
 Get graph entity type configuration.

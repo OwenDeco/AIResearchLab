@@ -21,22 +21,22 @@ function ContextCard({ ctx, index }: { ctx: QueryResponse['contexts'][0]; index:
   const graphSummary = ctx.metadata?.graph_summary as string | undefined
 
   return (
-    <div className="border border-slate-200 rounded-lg p-3">
+    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
       <div className="flex items-center gap-2 mb-2 flex-wrap">
         <Badge variant="blue">#{index + 1}</Badge>
         <Badge variant="green">score: {ctx.score.toFixed(3)}</Badge>
-        <span className="text-xs text-slate-500 font-mono">
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
           {ctx.doc_id.length > 20 ? ctx.doc_id.slice(0, 20) + '…' : ctx.doc_id}
         </span>
       </div>
 
       {graphSummary && (
-        <p className="text-xs text-slate-500 bg-slate-50 rounded p-1.5 mb-2 font-mono leading-relaxed">
+        <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 rounded p-1.5 mb-2 font-mono leading-relaxed">
           {graphSummary}
         </p>
       )}
 
-      <p className="text-sm text-slate-700">
+      <p className="text-sm text-slate-700 dark:text-slate-200">
         {expanded ? ctx.content : ctx.content.slice(0, 300) + (ctx.content.length > 300 ? '…' : '')}
       </p>
       {ctx.content.length > 300 && (
@@ -144,32 +144,32 @@ export function Playground() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Runtime Playground</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Runtime Playground</h1>
 
       <div className="flex gap-6">
         {/* Left panel */}
         <div className="w-96 flex-shrink-0 space-y-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-            <label className="block text-sm font-medium text-slate-700 mb-1">Query</label>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Query</label>
             <textarea
-              className="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y min-h-32"
+              className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y min-h-32 dark:bg-slate-700 dark:text-slate-100"
               placeholder="Enter your query…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700">Configuration</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Configuration</h3>
 
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Retrieval</p>
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Retrieval Mode
               </label>
               <select
-                className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-slate-100"
                 value={retrievalMode}
                 onChange={(e) => setRetrievalMode(e.target.value)}
               >
@@ -181,7 +181,7 @@ export function Playground() {
               </select>
             </div>
 
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 pt-1 border-t border-slate-100">Models</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700">Models</p>
 
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">LLM</label>

@@ -151,7 +151,7 @@ export function AgentWidget() {
             ? 'bg-slate-700 hover:bg-slate-800 rotate-0'
             : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'
           }`}
-        title="RAG Lab Agent"
+        title="System Agent"
       >
         {open
           ? <X size={22} className="text-white" />
@@ -166,7 +166,7 @@ export function AgentWidget() {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed bottom-24 right-6 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
+          className="fixed bottom-24 right-6 z-50 w-96 bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
           style={{ height: '560px' }}
         >
           {/* Header */}
@@ -174,8 +174,8 @@ export function AgentWidget() {
             <div className="flex items-center gap-2">
               <Bot size={18} />
               <div>
-                <p className="text-sm font-semibold leading-tight">RAG Lab Agent</p>
-                <p className="text-xs text-blue-200 leading-tight">Project expert · APIs, config, features</p>
+                <p className="text-sm font-semibold leading-tight">System Agent</p>
+                <p className="text-xs text-blue-200 leading-tight">Platform expert · APIs, config, features</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -197,11 +197,11 @@ export function AgentWidget() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50 dark:bg-slate-900">
             {turns.length === 0 && !loading && (
-              <div className="flex flex-col items-center justify-center h-full text-slate-400 text-center px-4">
-                <Bot size={36} className="mb-2 text-slate-300" />
-                <p className="text-sm font-medium">Ask about the RAG Lab</p>
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 text-center px-4">
+                <Bot size={36} className="mb-2 text-slate-300 dark:text-slate-600" />
+                <p className="text-sm font-medium">Ask about platform configuration</p>
                 <p className="text-xs mt-1">APIs, retrieval modes, config, graph, benchmarks…</p>
               </div>
             )}
@@ -216,19 +216,19 @@ export function AgentWidget() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1">
-                    <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-slate-800 leading-relaxed shadow-sm whitespace-pre-wrap max-w-[85%]">
+                    <div className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-slate-800 dark:text-slate-100 leading-relaxed shadow-sm whitespace-pre-wrap max-w-[85%]">
                       {turn.message.content}
                     </div>
                     {(turn.latency_ms !== undefined || (turn.sources && turn.sources.length > 0)) && (
                       <div>
                         <div className="flex items-center gap-2 ml-1">
                           {turn.latency_ms !== undefined && (
-                            <span className="text-xs text-slate-400">{(turn.latency_ms / 1000).toFixed(1)}s</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500">{(turn.latency_ms / 1000).toFixed(1)}s</span>
                           )}
                           {turn.sources && turn.sources.length > 0 && (
                             <button
                               onClick={() => toggleSources(i)}
-                              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                              className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                             >
                               {expandedSources.has(i) ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                               {turn.sources.length} source{turn.sources.length !== 1 ? 's' : ''}
@@ -240,9 +240,9 @@ export function AgentWidget() {
                             {turn.sources.map((src, si) => (
                               <div
                                 key={si}
-                                className="bg-slate-100 rounded-lg px-2.5 py-1.5 text-xs text-slate-600"
+                                className="bg-slate-100 dark:bg-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300"
                               >
-                                <div className="flex justify-between mb-0.5 text-slate-400">
+                                <div className="flex justify-between mb-0.5 text-slate-400 dark:text-slate-500">
                                   <span className="truncate max-w-[160px] font-medium">{src.doc_id}</span>
                                   <span>{src.score.toFixed(2)}</span>
                                 </div>
@@ -260,11 +260,11 @@ export function AgentWidget() {
 
             {loading && (
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center">
-                  <Bot size={12} className="text-slate-500" />
+                <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                  <Bot size={12} className="text-slate-500 dark:text-slate-400" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
-                  <Loader2 size={14} className="text-slate-400 animate-spin" />
+                <div className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
+                  <Loader2 size={14} className="text-slate-400 dark:text-slate-500 animate-spin" />
                 </div>
               </div>
             )}
@@ -273,11 +273,11 @@ export function AgentWidget() {
           </div>
 
           {/* Input */}
-          <div className="border-t border-slate-200 bg-white px-3 py-2 flex items-end gap-2">
+          <div className="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 flex items-end gap-2">
             <textarea
               ref={textareaRef}
-              className="flex-1 resize-none text-sm text-slate-800 focus:outline-none max-h-28 leading-relaxed placeholder-slate-400"
-              placeholder="Ask about the RAG Lab… (Enter to send)"
+              className="flex-1 resize-none text-sm text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none max-h-28 leading-relaxed placeholder-slate-400 dark:placeholder-slate-500"
+              placeholder="Ask about platform configuration… (Enter to send)"
               rows={1}
               value={input}
               onChange={(e) => {
@@ -290,7 +290,7 @@ export function AgentWidget() {
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading}
-              className="flex-shrink-0 w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+              className="flex-shrink-0 w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 dark:disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
             >
               <Send size={13} className="text-white" />
             </button>

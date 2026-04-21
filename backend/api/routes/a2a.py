@@ -344,6 +344,7 @@ async def _run_agent_loop(
     messages: List[Dict],
     trace_id: Optional[str] = None,
     run_id: Optional[str] = None,
+    platform_only: bool = False,
 ) -> str:
     """
     Full tool-calling agent loop.
@@ -361,11 +362,17 @@ async def _run_agent_loop(
     from connections.mcp_client import _call_tool_async, _unwrap_exception
     from models.registry import get_llm
 
-    connections = _load_mcp_connections()
-    mcp_openai_tools, mcp_name_map = _build_agent_tools(connections)
-    a2a_agents = _load_a2a_connections()
-    a2a_openai_tools, a2a_name_map = _build_a2a_tools(a2a_agents)
-    all_tools = NATIVE_TOOL_SCHEMAS + mcp_openai_tools + a2a_openai_tools
+    if platform_only:
+        # System Agent: no data tools, no external connections
+        mcp_openai_tools, mcp_name_map = [], {}
+        a2a_openai_tools, a2a_name_map = {}, {}
+        all_tools = []
+    else:
+        connections = _load_mcp_connections()
+        mcp_openai_tools, mcp_name_map = _build_agent_tools(connections)
+        a2a_agents = _load_a2a_connections()
+        a2a_openai_tools, a2a_name_map = _build_a2a_tools(a2a_agents)
+        all_tools = NATIVE_TOOL_SCHEMAS + mcp_openai_tools + a2a_openai_tools
 
     full_messages: List[Dict] = [
         {"role": "system", "content": _build_system_prompt()}

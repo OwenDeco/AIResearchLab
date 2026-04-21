@@ -220,18 +220,22 @@ class BenchmarkRunner:
         # Unified run: finalise the top-level UnifiedRun record
         if _ur_id:
             try:
-                from models_db import UnifiedRun as _UR, BenchmarkRun as BenchmarkRunModel
-                _bm_run = self._db.query(BenchmarkRunModel).filter(
-                    BenchmarkRunModel.id == benchmark_run_id
-                ).first()
+                from models_db import UnifiedRun as _UR
                 _ur2 = self._db.query(_UR).filter(_UR.id == _ur_id).first()
                 if _ur2:
                     _ur2.status = _final_status
                     _ur2.ended_at = datetime.now(timezone.utc).replace(tzinfo=None)
                     _ur2.summary_json = json.dumps({
+                        "name": _bm_name,
                         "total_questions": total,
                         "completed_questions": completed,
+                        "step_count": completed,
                         "status": _final_status,
+                        "total_cost_usd": round(_total_cost, 6),
+                        "total_tokens": _total_prompt_tokens + _total_completion_tokens,
+                        "total_prompt_tokens": _total_prompt_tokens,
+                        "total_completion_tokens": _total_completion_tokens,
+                        "total_latency_ms": round(_total_latency_ms, 1),
                     })
                     self._db.commit()
             except Exception as _exc:
@@ -379,6 +383,8 @@ class BenchmarkRunner:
             "contexts_json": json.dumps(contexts_data),
             "latency_ms": metrics["total_elapsed_ms"],
             "estimated_cost_usd": metrics["estimated_cost_usd"],
+            "prompt_tokens": metrics["prompt_tokens"],
+            "completion_tokens": metrics["completion_tokens"],
         }
 
     # ------------------------------------------------------------------

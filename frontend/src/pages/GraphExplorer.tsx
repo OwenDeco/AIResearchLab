@@ -339,7 +339,7 @@ export function GraphExplorer() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Graph Explorer</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Graph Explorer</h1>
 
       {error && (
         <div className="mb-4">
@@ -352,8 +352,8 @@ export function GraphExplorer() {
           <Spinner size="lg" />
         </div>
       ) : isEmpty ? (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8 text-center">
-          <p className="text-slate-500">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-8 text-center">
+          <p className="text-slate-500 dark:text-slate-400">
             No graph data. Ingest documents with "Extract Graph" enabled.
           </p>
         </div>
@@ -362,7 +362,7 @@ export function GraphExplorer() {
           {/* Left: graph + filter bar (70%) */}
           <div className="flex-1 min-w-0">
             {/* Filter bar */}
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 mb-3 flex flex-wrap gap-3 items-center">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-3 mb-3 flex flex-wrap gap-3 items-center">
               {/* Entity type checkboxes */}
               <div className="flex flex-wrap gap-2">
                 {entityTypes.map(({ name, color }) => (
@@ -382,7 +382,7 @@ export function GraphExplorer() {
 
               {/* Document filter */}
               <select
-                className="border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={filterDocId}
                 onChange={(e) => setFilterDocId(e.target.value)}
               >

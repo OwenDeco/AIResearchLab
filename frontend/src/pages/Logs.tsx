@@ -96,14 +96,14 @@ export function Logs() {
     <div className="max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Logs</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Audit trail for all connection events — inbound calls, registrations, tunnel changes</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Logs</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Audit trail for all connection events — inbound calls, registrations, tunnel changes</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 disabled:opacity-50"
           >
             <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
             Refresh
@@ -125,7 +125,7 @@ export function Logs() {
           <button
             key={d}
             onClick={() => setDirection(d)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${direction === d ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${direction === d ? 'bg-slate-800 dark:bg-slate-600 text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
           >
             {d.charAt(0).toUpperCase() + d.slice(1)}
             {d !== 'all' && (
@@ -144,35 +144,35 @@ export function Logs() {
         )}
 
         {filterRunId && (
-          <div className="flex items-center gap-1 bg-indigo-50 border border-indigo-200 rounded px-2 py-1 text-xs text-indigo-700">
+          <div className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded px-2 py-1 text-xs text-indigo-700 dark:text-indigo-300">
             <span>Run: {filterRunId.slice(0, 8)}</span>
             <button onClick={() => setFilterRunId(null)} className="ml-1 hover:text-indigo-900 font-medium">✕</button>
           </div>
         )}
 
-        <span className="ml-auto text-xs text-slate-400 self-center">{filtered.length} event{filtered.length !== 1 ? 's' : ''}</span>
+        <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 self-center">{filtered.length} event{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20 text-slate-400">Loading…</div>
+        <div className="flex justify-center py-20 text-slate-400 dark:text-slate-500">Loading…</div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center text-slate-400 dark:text-slate-500">
           <p className="text-base font-medium mb-1">No events yet</p>
           <p className="text-sm">Connection activity will appear here as you use the lab.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-slate-500 font-medium w-40">Time</th>
-                <th className="text-left px-3 py-3 text-slate-500 font-medium w-20">Trace</th>
-                <th className="text-left px-3 py-3 text-slate-500 font-medium w-20">Run</th>
-                <th className="text-left px-4 py-3 text-slate-500 font-medium w-24">Direction</th>
-                <th className="text-left px-4 py-3 text-slate-500 font-medium w-16">Type</th>
-                <th className="text-left px-4 py-3 text-slate-500 font-medium w-36">Event</th>
-                <th className="text-left px-4 py-3 text-slate-500 font-medium">Summary</th>
-                <th className="text-left px-4 py-3 text-slate-500 font-medium w-28">Caller</th>
+              <tr className="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-300 font-medium w-40">Time</th>
+                <th className="text-left px-3 py-3 text-slate-500 dark:text-slate-300 font-medium w-20">Trace</th>
+                <th className="text-left px-3 py-3 text-slate-500 dark:text-slate-300 font-medium w-20">Run</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-300 font-medium w-24">Direction</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-300 font-medium w-16">Type</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-300 font-medium w-36">Event</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-300 font-medium">Summary</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-300 font-medium w-28">Caller</th>
               </tr>
             </thead>
             <tbody>

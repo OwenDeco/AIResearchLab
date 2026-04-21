@@ -22,6 +22,10 @@ interface AppStore {
   // Graph extraction progress — persists across page navigation
   extractProgress: Record<string, ExtractProgressEntry>
   setExtractProgress: (updater: (prev: Record<string, ExtractProgressEntry>) => Record<string, ExtractProgressEntry>) => void
+
+  // Dark mode
+  darkMode: boolean
+  toggleDarkMode: () => void
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -29,6 +33,7 @@ export const useAppStore = create<AppStore>((set) => ({
   documents: [],
   activeSessionId: null,
   extractProgress: {},
+  darkMode: localStorage.getItem('darkMode') === 'true',
 
   setModels: (m) => set({ models: m }),
 
@@ -44,4 +49,12 @@ export const useAppStore = create<AppStore>((set) => ({
 
   setExtractProgress: (updater) =>
     set((state) => ({ extractProgress: updater(state.extractProgress) })),
+
+  toggleDarkMode: () =>
+    set((state) => {
+      const next = !state.darkMode
+      localStorage.setItem('darkMode', String(next))
+      document.documentElement.classList.toggle('dark', next)
+      return { darkMode: next }
+    }),
 }))

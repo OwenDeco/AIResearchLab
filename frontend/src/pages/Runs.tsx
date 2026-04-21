@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import { Spinner } from '../components/Spinner'
 
 interface RunSummary {
+  name?: string
   total_latency_ms?: number
   total_tokens?: number
   total_cost_usd?: number
@@ -137,6 +138,9 @@ function RunDetail({ run, steps, events }: { run: UnifiedRun; steps: RunStep[]; 
       {/* Summary */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Run Summary</p>
+        {run.summary?.name && (
+          <p className="text-sm font-semibold text-slate-700 mb-2">{run.summary.name}</p>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {(
             [
@@ -405,7 +409,12 @@ function RunRows({
         onClick={onToggle}
       >
         <td className="px-4 py-2.5"><DomainBadge domain={run.primary_domain} /></td>
-        <td className="px-4 py-2.5 text-xs text-slate-600 font-mono">{run.run_type.replace('_', ' ')}</td>
+        <td className="px-4 py-2.5 text-xs text-slate-600 font-mono">
+          <span>{run.run_type.replace('_', ' ')}</span>
+          {run.summary?.name && (
+            <span className="ml-1.5 text-slate-400">· {run.summary.name}</span>
+          )}
+        </td>
         <td className="px-4 py-2.5"><StatusBadge status={run.status} /></td>
         <td className="px-4 py-2.5 text-xs text-slate-500 whitespace-nowrap">
           {new Date(run.started_at).toLocaleString('en-GB', {

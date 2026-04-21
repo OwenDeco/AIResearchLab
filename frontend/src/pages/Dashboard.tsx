@@ -17,9 +17,9 @@ import type { Run } from '../types'
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-      <p className="text-sm text-slate-500 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-slate-800">{value}</p>
+    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{label}</p>
+      <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</p>
     </div>
   )
 }
@@ -77,7 +77,7 @@ export function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Dashboard</h1>
 
       {error && (
         <div className="mb-4">
@@ -95,8 +95,8 @@ export function Dashboard() {
 
       {/* Bar chart */}
       {modeChartData.length > 0 && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">Runs by Retrieval Mode</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-8">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Runs by Retrieval Mode</h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={modeChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -110,10 +110,10 @@ export function Dashboard() {
       )}
 
       {/* Recent runs table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Recent Runs</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Recent Runs</h2>
         {runs.length === 0 ? (
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
             No runs yet. Head to the{' '}
             <Link to="/playground" className="text-blue-600 hover:underline">
               Playground
@@ -124,26 +124,26 @@ export function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Query</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Mode</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Model</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Latency</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Cost</th>
-                  <th className="text-left py-2 text-slate-600 font-medium">Date</th>
+                <tr className="border-b border-slate-200 dark:border-slate-700">
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Query</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Mode</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Model</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Latency</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Cost</th>
+                  <th className="text-left py-2 text-slate-600 dark:text-slate-300 font-medium">Date</th>
                 </tr>
               </thead>
               <tbody>
                 {recentRuns.map((run) => (
-                  <tr key={run.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-2 pr-4 text-slate-800 max-w-xs truncate">
+                  <tr key={run.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 max-w-xs truncate">
                       {run.query.length > 60 ? run.query.slice(0, 60) + '…' : run.query}
                     </td>
-                    <td className="py-2 pr-4 text-slate-600">{run.retrieval_mode}</td>
-                    <td className="py-2 pr-4 text-slate-600 max-w-xs truncate">{run.model_name}</td>
-                    <td className="py-2 pr-4 text-slate-600">{run.latency_ms?.toFixed(0)}ms</td>
-                    <td className="py-2 pr-4 text-slate-600">${run.estimated_cost_usd?.toFixed(4)}</td>
-                    <td className="py-2 text-slate-500">
+                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{run.retrieval_mode}</td>
+                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300 max-w-xs truncate">{run.model_name}</td>
+                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{run.latency_ms?.toFixed(0)}ms</td>
+                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">${run.estimated_cost_usd?.toFixed(4)}</td>
+                    <td className="py-2 text-slate-500 dark:text-slate-400">
                       {new Date(run.created_at).toLocaleDateString()}
                     </td>
                   </tr>

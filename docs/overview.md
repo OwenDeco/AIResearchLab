@@ -17,7 +17,7 @@ backend/
   models/           LLM, embedding, and reranker provider abstraction
   benchmarking/     Benchmark run orchestration
   evaluation/       Quality metric computation
-  observability/    Token/cost/latency tracking
+  observability/    Token/cost/latency tracking; unified run/step/event recording across all execution paths
   database.py       SQLAlchemy + SQLite setup
   models_db.py      ORM models
   config.py         Settings loaded from .env
@@ -40,6 +40,37 @@ docs/               This documentation (used by the RAG Lab Agent)
 | Styling | Tailwind CSS |
 | Charts | Recharts |
 | Graph visualization | react-force-graph-2d |
+
+## ORM Models (`models_db.py`)
+
+Key SQLAlchemy models defined in `backend/models_db.py`:
+
+- `Document` — ingested file record (filename, chunking strategy, status)
+- `Chunk` — individual text chunk linked to a document
+- `Run` — a single RAG query execution (retrieval mode, model, latency, tokens, cost)
+- `BenchmarkRun` / `BenchmarkResult` — benchmark session and per-question results
+- `AgentSession` / `AgentMessage` — agent chat sessions and messages
+- `ConnectionLog` — audit log for all connection events (A2A, MCP, system)
+- `RegisteredConnection` — persisted external A2A agents and MCP servers
+- `UnifiedRun` — one record per run across all domains; links to domain-specific records via `source_id`/`source_table`
+- `RunStep` — individual steps within a run (retrieve_chunks, llm_call, tool_call, score_answer, etc.) with timing and metrics
+- `RunEvent` — fine-grained events attached to run/step context, categorized as execution/data/ai/connection/evaluation/governance
+
+## UI Pages
+
+| Page | Route | Description |
+|---|---|---|
+| Dashboard | `/` | Run history, benchmark history, cost/latency overview |
+| Document Ingestion | `/ingestion` | Upload files, select chunking strategy, inspect chunks |
+| Runtime Playground | `/playground` | Query interface, choose retrieval mode + model, inspect context + answer |
+| Benchmark Lab | `/benchmark` | Define question sets, run multi-config benchmarks, compare results |
+| Graph Explorer | `/graph` | Interactive entity/relation visualization |
+| Analytics | `/analytics` | Filter and compare cost, latency, quality by model/mode/strategy/date |
+| Settings | `/settings` | Provider API keys, agent toggles, custom model IDs |
+| Connections | `/connections` | Exposed protocols, consumed services, ngrok tunnel, registered connections |
+| Agent | `/agent` | Full-page chat with the RAG Lab Agent, persistent sessions |
+| Logs | `/logs` | Audit trail for all connection events |
+| Runs | `/runs` | Cross-domain run browser with domain/type/status filters, step timeline, and event log |
 
 ## Running the Application
 

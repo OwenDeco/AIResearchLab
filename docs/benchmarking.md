@@ -2,6 +2,8 @@
 
 The Benchmark Lab allows running multiple retrieval configurations against a question set and comparing quality metrics side-by-side.
 
+> **Unified run tracking:** Every benchmark run creates a `UnifiedRun` record in the `evaluation` domain. Each question/config pair becomes a `RunStep` with type `score_answer`, including per-step cost, tokens, latency, and quality metrics. The benchmark name is recorded in the run summary. Results are browsable in the **Runs** page under Governance & Observability.
+
 ---
 
 ## Concepts
@@ -76,6 +78,10 @@ Each result includes:
 | `chunks_retrieved` | int | Number of chunks actually returned by retriever |
 
 **Note:** `answer_correctness` and `faithfulness` require reference answers. If no reference answer is provided, these will be null.
+
+**Per-step metrics** (recorded on each `RunStep` in the unified run): `prompt_tokens`, `completion_tokens`, `cost_usd`, `latency_ms`, `context_precision`, `answer_relevance`, `answer_correctness`
+
+**Final run summary fields** (stored on the `UnifiedRun`): `name`, `total_cost_usd`, `total_tokens`, `total_prompt_tokens`, `total_completion_tokens`, `total_latency_ms`, `step_count`, `completed_questions`
 
 ---
 

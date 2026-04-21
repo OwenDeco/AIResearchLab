@@ -284,12 +284,12 @@ export function Agent() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Bot size={24} className="text-blue-600" />
-              RAG Lab Agent
+              System Agent
             </h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Project expert · APIs, features, configuration, parameters
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Platform expert · APIs, features, configuration, parameters
             </p>
           </div>
         </div>
@@ -297,9 +297,9 @@ export function Agent() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-2">
           {turns.length === 0 && !loading && (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400">
-              <Bot size={48} className="mb-3 text-slate-300" />
-              <p className="text-base font-medium">Ask anything about the RAG Lab</p>
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+              <Bot size={48} className="mb-3 text-slate-300 dark:text-slate-600" />
+              <p className="text-base font-medium">Ask about platform configuration and features</p>
               <p className="text-sm mt-1">APIs, retrieval modes, configuration, graph extraction, benchmarking…</p>
             </div>
           )}
@@ -312,7 +312,7 @@ export function Agent() {
                     <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm leading-relaxed">
                       {turn.message.content}
                     </div>
-                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mt-0.5">
                       <User size={14} className="text-blue-600" />
                     </div>
                   </div>
@@ -320,11 +320,11 @@ export function Agent() {
               ) : (
                 <div className="flex justify-start">
                   <div className="flex items-start gap-2 max-w-[85%]">
-                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center mt-0.5">
-                      <Bot size={14} className="text-slate-600" />
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mt-0.5">
+                      <Bot size={14} className="text-slate-600 dark:text-slate-300" />
                     </div>
                     <div className="space-y-2">
-                      <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-slate-800 leading-relaxed shadow-sm whitespace-pre-wrap">
+                      <div className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 leading-relaxed shadow-sm whitespace-pre-wrap">
                         {turn.message.content}
                       </div>
 
@@ -336,7 +336,7 @@ export function Agent() {
                         {turn.sources && turn.sources.length > 0 && (
                           <button
                             onClick={() => toggleSources(i)}
-                            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                            className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                           >
                             {expandedSources.has(i) ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                             {turn.sources.length} source{turn.sources.length !== 1 ? 's' : ''}
@@ -349,11 +349,11 @@ export function Agent() {
                           {turn.sources.map((src, si) => (
                             <div
                               key={si}
-                              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600"
+                              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-600 dark:text-slate-300"
                             >
-                              <div className="flex justify-between mb-1 font-medium text-slate-500">
+                              <div className="flex justify-between mb-1 font-medium text-slate-500 dark:text-slate-400">
                                 <span className="truncate max-w-xs">{src.doc_id}</span>
-                                <span className="ml-2 text-slate-400">score {src.score.toFixed(3)}</span>
+                                <span className="ml-2 text-slate-400 dark:text-slate-500">score {src.score.toFixed(3)}</span>
                               </div>
                               <p className="line-clamp-3">{src.content}</p>
                             </div>
@@ -371,10 +371,10 @@ export function Agent() {
           {loading && (
             <div className="flex justify-start">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center">
-                  <Bot size={14} className="text-slate-600" />
+                <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                  <Bot size={14} className="text-slate-600 dark:text-slate-300" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm">
+                <div className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm">
                   <Loader2 size={16} className="text-slate-400 animate-spin" />
                 </div>
               </div>
@@ -385,9 +385,9 @@ export function Agent() {
         </div>
 
         {/* Input */}
-        <div className="mt-3 bg-white border border-slate-300 rounded-2xl shadow-sm flex items-end gap-2 px-4 py-3">
+        <div className="mt-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-sm flex items-end gap-2 px-4 py-3">
           <textarea
-            className="flex-1 resize-none text-sm text-slate-800 focus:outline-none max-h-40 leading-relaxed"
+            className="flex-1 resize-none text-sm text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none max-h-40 leading-relaxed placeholder-slate-400 dark:placeholder-slate-500"
             placeholder="Ask about APIs, retrieval modes, config… (Enter to send, Shift+Enter for newline)"
             rows={1}
             value={input}
@@ -401,7 +401,7 @@ export function Agent() {
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="flex-shrink-0 w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+            className="flex-shrink-0 w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
           >
             <Send size={14} className="text-white disabled:text-slate-400" />
           </button>

@@ -319,7 +319,7 @@ export function Ingestion() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Document Ingestion</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Document Ingestion</h1>
 
       {error && (
         <div className="mb-4">
@@ -328,15 +328,15 @@ export function Ingestion() {
       )}
 
       {/* Upload card */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Upload Document</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-6">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Upload Document</h2>
 
         {/* Drop zone */}
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer mb-4 transition-colors ${
             isDragging
-              ? 'border-blue-400 bg-blue-50'
-              : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
+              ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/30'
+              : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-700/50'
           }`}
           onDragOver={(e) => {
             e.preventDefault()
@@ -353,8 +353,8 @@ export function Ingestion() {
           onClick={() => fileInputRef.current?.click()}
         >
           <FileText className="mx-auto mb-2 text-slate-400" size={32} />
-          <p className="text-slate-500">Drop files here, or click to browse</p>
-          <p className="text-xs text-slate-400 mt-1">PDF · DOCX · XLSX · PPTX · TXT · MD · HTML · CSV · multiple files supported</p>
+          <p className="text-slate-500 dark:text-slate-400">Drop files here, or click to browse</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">PDF · DOCX · XLSX · PPTX · TXT · MD · HTML · CSV · multiple files supported</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -368,9 +368,9 @@ export function Ingestion() {
         {/* Config row */}
         <div className="flex flex-wrap gap-4 mb-4 items-end">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-600">Chunking Strategy</label>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Chunking Strategy</label>
             <select
-              className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-slate-100"
               value={chunkStrategy}
               onChange={(e) => setChunkStrategy(e.target.value)}
             >
@@ -385,10 +385,10 @@ export function Ingestion() {
           {chunkStrategy !== 'semantic' && (
             <>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-600">Chunk Size</label>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Chunk Size</label>
                 <input
                   type="number"
-                  className="border border-slate-300 rounded px-2 py-1.5 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-slate-100"
                   value={chunkSize}
                   min={64}
                   max={4096}

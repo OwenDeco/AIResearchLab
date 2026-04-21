@@ -51,7 +51,7 @@ Upload and manage documents.
 
 ---
 
-### 3. Retrieval Playground (`/playground`)
+### 3. Runtime Playground (`/playground`)
 
 Interactive query interface for testing retrieval modes.
 
@@ -221,9 +221,28 @@ Audit trail for all connection events.
 - Direction filter tabs: **All** | **Inbound** | **Outbound** | **Internal** | **System**
 - Each row: timestamp, **trace badge**, direction badge, connection type badge, event type, summary, caller IP
 - **Trace column**: every A2A request gets a `trace_id`. The Trace column shows a color-coded 8-char short ID. Click it to filter the whole table to that single request (waterfall view). Click again or ✕ to clear.
+- **Run column**: each log entry shows a short `run_id` badge (first 8 chars); click it to filter the table to all events from that run; a ✕ chip clears the filter
 - **Events captured:** A2A inbound call, LLM tool-selection calls, tool chosen, MCP tool call (outbound), MCP tool response (inbound), native tool calls, outbound A2A response; plus registration/deletion/test events and ngrok tunnel start/stop
 - **Refresh** button re-fetches from the backend
 - **Clear all** button deletes all log entries
+
+---
+
+### 11. Runs (`/runs`)
+
+Cross-domain run browser — every execution across the platform in one view.
+
+**Features:**
+- Domain filter tabs: All | Orchestration | Evaluation | Interoperability | Context Engineering | Governance
+- Run type dropdown: All Types | Runtime Test | Retrieval Test | Benchmark Run | Connection Test | Agent Session
+- Status filter: All | Running | Completed | Failed
+- Table: domain badge, run type + name, status badge, started-at timestamp, duration, total tokens, total cost, step count
+- Click any row to expand an inline detail panel with three sections:
+  1. **Run Summary** — KPI cards (latency, tokens, cost, errors) + output preview; benchmark name shown as heading
+  2. **Steps Timeline** — ordered step list with colored dots (blue=retrieve_chunks, purple=llm_call, amber=tool_call, green=score_answer), component name, proportional duration bar, and status
+  3. **Events log** — fine-grained events table with category badges (execution, data, ai, connection, evaluation, governance), event type, severity, and summary
+
+**Data source:** `GET /api/unified-runs` and `GET /api/unified-runs/{id}/steps|events`
 
 ---
 
@@ -239,6 +258,19 @@ A floating chat button (bottom-right corner, Bot icon) is available on every pag
 - Maximize button → navigates to `/agent` page
 - Green dot indicator when conversation history exists
 - Shares the **active session** with the Agent page via Zustand store (`activeSessionId`). Switching sessions on the Agent page also updates the widget, and clearing the widget (new session) is reflected on the Agent page. Messages survive page reloads.
+
+---
+
+## Sidebar Navigation
+
+The sidebar is organised into 7 domain groups:
+- **Overview** — Dashboard
+- **Context Engineering** — Ingest, Graph Explorer
+- **Orchestration & Runtime** — Runtime Playground, Agent
+- **Interoperability** — Connections
+- **Evaluation & Benchmarking** — Benchmark Lab
+- **Governance & Observability** — Analytics, Runs, Logs
+- **Platform Configuration** — Settings
 
 ---
 
@@ -266,6 +298,7 @@ frontend/src/
     Connections.tsx
     Agent.tsx
     Logs.tsx
+    Runs.tsx
   store/
     useAppStore.ts     Zustand global state
   types/

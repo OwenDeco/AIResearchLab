@@ -12,7 +12,10 @@ import {
   Activity,
   ScrollText,
   Settings,
+  Moon,
+  Sun,
 } from 'lucide-react'
+import { useAppStore } from '../store/useAppStore'
 
 const navGroups: Array<{
   label: string
@@ -35,7 +38,6 @@ const navGroups: Array<{
     label: 'Orchestration & Runtime',
     items: [
       { to: '/playground', icon: MessageSquare, label: 'Runtime Playground' },
-      { to: '/agent',      icon: Bot,           label: 'Agent' },
       { to: '/orchestration/simulator', icon: Gamepad2, label: 'Pixel Simulator' },
     ],
   },
@@ -62,6 +64,7 @@ const navGroups: Array<{
   {
     label: 'Platform Configuration',
     items: [
+      { to: '/agent',    icon: Bot,      label: 'System Agent' },
       { to: '/settings', icon: Settings, label: 'Settings' },
     ],
   },
@@ -87,6 +90,8 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementTyp
 }
 
 export function Layout() {
+  const { darkMode, toggleDarkMode } = useAppStore()
+
   return (
     <div className="flex min-h-screen">
       {/* Fixed sidebar */}
@@ -110,13 +115,20 @@ export function Layout() {
           ))}
         </nav>
 
-        <div className="px-4 py-3 text-xs text-slate-500 border-t border-slate-700">
-          RAG Lab v1.0
+        <div className="px-4 py-3 border-t border-slate-700 flex items-center justify-between">
+          <span className="text-xs text-slate-500">RAG Lab v1.0</span>
+          <button
+            onClick={toggleDarkMode}
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+          >
+            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="ml-60 min-h-screen bg-slate-50 p-6 flex-1">
+      <main className="ml-60 min-h-screen bg-slate-50 dark:bg-slate-900 p-6 flex-1 transition-colors">
         <Outlet />
       </main>
     </div>
