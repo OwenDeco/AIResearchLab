@@ -17,6 +17,7 @@ import { api } from '../api/client'
 import { Spinner } from '../components/Spinner'
 import { ErrorAlert } from '../components/ErrorAlert'
 import type { Run } from '../types'
+import { parseUTC } from '../utils/date'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -95,7 +96,7 @@ function TabButton({
       className={`px-4 py-2 text-sm rounded-md border transition-colors ${
         active
           ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium shadow-sm'
-          : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-200'
+          : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100'
       }`}
     >
       {label}
@@ -199,22 +200,22 @@ function QueriesTab({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-2 pr-4 text-slate-600 font-medium">Mode</th>
-                    <th className="text-right py-2 pr-4 text-slate-600 font-medium">Runs</th>
-                    <th className="text-right py-2 pr-4 text-slate-600 font-medium">Avg Latency</th>
-                    <th className="text-right py-2 pr-4 text-slate-600 font-medium">Avg Cost</th>
-                    <th className="text-right py-2 text-slate-600 font-medium">Avg Chunks</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-600">
+                    <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Mode</th>
+                    <th className="text-right py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Runs</th>
+                    <th className="text-right py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Avg Latency</th>
+                    <th className="text-right py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Avg Cost</th>
+                    <th className="text-right py-2 text-slate-600 dark:text-slate-300 font-medium">Avg Chunks</th>
                   </tr>
                 </thead>
                 <tbody>
                   {by_mode.map((row) => (
-                    <tr key={row.mode} className="border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <tr key={row.mode} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                       <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 font-medium">{row.mode}</td>
-                      <td className="py-2 pr-4 text-right text-slate-600">{row.count}</td>
-                      <td className="py-2 pr-4 text-right text-slate-600">{row.avg_latency_ms.toFixed(0)} ms</td>
-                      <td className="py-2 pr-4 text-right text-slate-600">${row.avg_cost_usd.toFixed(4)}</td>
-                      <td className="py-2 text-right text-slate-600">{row.avg_chunks.toFixed(1)}</td>
+                      <td className="py-2 pr-4 text-right text-slate-600 dark:text-slate-300">{row.count}</td>
+                      <td className="py-2 pr-4 text-right text-slate-600 dark:text-slate-300">{row.avg_latency_ms.toFixed(0)} ms</td>
+                      <td className="py-2 pr-4 text-right text-slate-600 dark:text-slate-300">${row.avg_cost_usd.toFixed(4)}</td>
+                      <td className="py-2 text-right text-slate-600 dark:text-slate-300">{row.avg_chunks.toFixed(1)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -227,14 +228,14 @@ function QueriesTab({
           <div className="space-y-4 mt-2">
             {(['p50', 'p90', 'p99'] as const).map((p) => (
               <div key={p} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-600 uppercase">{p}</span>
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 uppercase">{p}</span>
                 <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
                   {latency_percentiles[p].toLocaleString()} ms
                 </span>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
             <span className="text-xs text-slate-500">Export runs as CSV</span>
             <button
               className="border border-slate-300 rounded px-3 py-1 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
@@ -324,13 +325,13 @@ function ConnectionsTab({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left py-2 pr-4 text-slate-600 font-medium">Name</th>
-                <th className="text-left py-2 pr-4 text-slate-600 font-medium">Type</th>
-                <th className="text-right py-2 pr-4 text-slate-600 font-medium">Inbound</th>
-                <th className="text-right py-2 pr-4 text-slate-600 font-medium">Outbound</th>
-                <th className="text-right py-2 pr-4 text-slate-600 font-medium">Errors</th>
-                <th className="text-right py-2 text-slate-600 font-medium">Error Rate</th>
+              <tr className="border-b border-slate-200 dark:border-slate-600">
+                <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Name</th>
+                <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Type</th>
+                <th className="text-right py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Inbound</th>
+                <th className="text-right py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Outbound</th>
+                <th className="text-right py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Errors</th>
+                <th className="text-right py-2 text-slate-600 dark:text-slate-300 font-medium">Error Rate</th>
               </tr>
             </thead>
             <tbody>
@@ -338,13 +339,13 @@ function ConnectionsTab({
                 const total = row.inbound + row.outbound
                 const rate = total > 0 ? ((row.errors / total) * 100).toFixed(1) : '0.0'
                 return (
-                  <tr key={row.name} className="border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700">
+                  <tr key={row.name} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 font-medium">{row.name}</td>
-                    <td className="py-2 pr-4 text-slate-500">{row.type || '—'}</td>
-                    <td className="py-2 pr-4 text-right text-slate-600">{row.inbound}</td>
-                    <td className="py-2 pr-4 text-right text-slate-600">{row.outbound}</td>
-                    <td className="py-2 pr-4 text-right text-red-600">{row.errors}</td>
-                    <td className="py-2 text-right text-slate-600">{rate}%</td>
+                    <td className="py-2 pr-4 text-slate-500 dark:text-slate-400">{row.type || '—'}</td>
+                    <td className="py-2 pr-4 text-right text-slate-600 dark:text-slate-300">{row.inbound}</td>
+                    <td className="py-2 pr-4 text-right text-slate-600 dark:text-slate-300">{row.outbound}</td>
+                    <td className="py-2 pr-4 text-right text-red-600 dark:text-red-400">{row.errors}</td>
+                    <td className="py-2 text-right text-slate-600 dark:text-slate-300">{rate}%</td>
                   </tr>
                 )
               })}
@@ -612,7 +613,7 @@ function PlatformTab({
                     <span className="text-slate-700 dark:text-slate-200">{ev.summary}</span>
                   </div>
                   <span className="text-xs text-slate-400 shrink-0 whitespace-nowrap">
-                    {new Date(ev.timestamp).toLocaleString()}
+                    {parseUTC(ev.timestamp).toLocaleString()}
                   </span>
                 </div>
               ))}
@@ -682,9 +683,9 @@ export function Analytics() {
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-4 mb-5">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-600">Date Range:</label>
+          <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Date Range:</label>
           <select
-            className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value as DateRange)}
           >
@@ -695,7 +696,7 @@ export function Analytics() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 ml-auto bg-slate-100 rounded-lg p-1">
+        <div className="flex items-center gap-1 ml-auto bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
           {(
             [
               { key: 'queries', label: 'RAG Queries' },

@@ -4,6 +4,7 @@ import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
 import { Ingestion } from './pages/Ingestion'
 import { Playground } from './pages/Playground'
+import { Agents } from './pages/Agents'
 import { BenchmarkLab } from './pages/BenchmarkLab'
 import { GraphExplorer } from './pages/GraphExplorer'
 import { Analytics } from './pages/Analytics'
@@ -13,6 +14,7 @@ import { Connections } from './pages/Connections'
 import { Logs } from './pages/Logs'
 import { Runs } from './pages/Runs'
 import { OrchestrationSimulator } from './pages/OrchestrationSimulator'
+import { Flow } from './pages/Flow'
 import { AgentWidget } from './components/AgentWidget'
 import { api } from './api/client'
 import { useAppStore } from './store/useAppStore'
@@ -48,6 +50,7 @@ function AppRoutes() {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/ingest" element={<Ingestion />} />
+          <Route path="/agents" element={<Agents />} />
           <Route path="/playground" element={<Playground />} />
           <Route path="/benchmark" element={<BenchmarkLab />} />
           <Route path="/graph" element={<GraphExplorer />} />
@@ -55,6 +58,7 @@ function AppRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/agent" element={<Agent />} />
           <Route path="/orchestration/simulator" element={<OrchestrationSimulator />} />
+          <Route path="/flow" element={<Flow />} />
           <Route path="/connections" element={<Connections />} />
           <Route path="/logs" element={<Logs />} />
           <Route path="/runs" element={<Runs />} />

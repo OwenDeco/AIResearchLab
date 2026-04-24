@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../api/client'
+import { useAppStore } from '../store/useAppStore'
 import { Spinner } from '../components/Spinner'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { Badge } from '../components/Badge'
@@ -49,6 +50,7 @@ interface GraphStats {
 }
 
 export function GraphExplorer() {
+  const { darkMode } = useAppStore()
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] })
   const [stats, setStats] = useState<GraphStats | null>(null)
   const [documents, setDocuments] = useState<Document_[]>([])
@@ -398,7 +400,7 @@ export function GraphExplorer() {
               <div className="flex gap-2 items-center ml-auto">
                 <input
                   type="text"
-                  className="border border-slate-300 rounded px-2 py-1 text-sm w-40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm w-40 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Search graph…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -444,6 +446,7 @@ export function GraphExplorer() {
                   nodeColor="color"
                   nodeVal="val"
                   linkLabel="predicate"
+                  linkColor={() => darkMode ? 'rgba(148,163,184,0.5)' : 'rgba(100,116,139,0.35)'}
                   onNodeClick={handleNodeClick}
                   onLinkClick={handleLinkClick}
                 />
@@ -480,21 +483,21 @@ export function GraphExplorer() {
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Graph Statistics</h3>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Nodes</span>
+                    <span className="text-slate-500 dark:text-slate-400">Nodes</span>
                     <span className="text-slate-800 dark:text-slate-100 font-medium">{stats.node_count}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Edges</span>
+                    <span className="text-slate-500 dark:text-slate-400">Edges</span>
                     <span className="text-slate-800 dark:text-slate-100 font-medium">{stats.edge_count}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Documents</span>
+                    <span className="text-slate-500 dark:text-slate-400">Documents</span>
                     <span className="text-slate-800 dark:text-slate-100 font-medium">{stats.doc_count}</span>
                   </div>
                 </div>
                 {stats.top_entities && stats.top_entities.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-xs font-medium text-slate-600 mb-1">Top Entities</p>
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Top Entities</p>
                     <div className="space-y-1">
                       {stats.top_entities.slice(0, 5).map((e, i) => (
                         <div key={i} className="flex justify-between text-xs items-center">
@@ -529,16 +532,16 @@ export function GraphExplorer() {
                 {entityTypes.map(({ name, color }) => (
                   <div key={name} className="flex items-center gap-2 text-xs">
                     <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                    <span className="text-slate-600">{name}</span>
+                    <span className="text-slate-600 dark:text-slate-300">{name}</span>
                   </div>
                 ))}
               </div>
               {predicates.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-100">
-                  <p className="text-xs font-medium text-slate-500 mb-1">Active predicates</p>
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Active predicates</p>
                   <div className="flex flex-wrap gap-1">
                     {predicates.filter(p => p.enabled).map(p => (
-                      <span key={p.name} className="text-xs bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 font-mono">
+                      <span key={p.name} className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded px-1.5 py-0.5 font-mono">
                         {p.name}
                       </span>
                     ))}
@@ -556,14 +559,14 @@ export function GraphExplorer() {
                 </div>
 
                 {/* Tab bar */}
-                <div className="flex border-b border-slate-200 mb-3 -mx-4 px-4">
+                <div className="flex border-b border-slate-200 dark:border-slate-700 mb-3 -mx-4 px-4">
                   {(['types', 'predicates', 'extraction'] as const).map((tab) => (
                     <button
                       key={tab}
                       className={`text-xs px-3 py-1.5 font-medium border-b-2 transition-colors ${
                         configTab === tab
                           ? 'border-blue-600 text-blue-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-200'
+                          : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100'
                       }`}
                       onClick={() => setConfigTab(tab)}
                     >

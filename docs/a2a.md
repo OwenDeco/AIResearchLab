@@ -1,6 +1,6 @@
 # A2A (Agent-to-Agent) Protocol
 
-The RAG Lab Agent is exposed as an A2A-compatible agent, allowing other AI agents and orchestrators to discover and call it using the [A2A protocol](https://google.github.io/A2A/).
+The AI Systems Lab Agent is exposed as an A2A-compatible agent, allowing other AI agents and orchestrators to discover and call it using the [A2A protocol](https://google.github.io/A2A/).
 
 ---
 
@@ -19,8 +19,8 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
 
 ```json
 {
-  "name": "RAG Lab Agent",
-  "description": "Expert assistant for the RAG Lab platform...",
+  "name": "AI Systems Lab Agent",
+  "description": "Expert assistant for the AI Systems Lab platform...",
   "url": "http://localhost:8002/a2a",
   "version": "1.0.0",
   "capabilities": {
@@ -35,7 +35,7 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
     {
       "id": "project-qa",
       "name": "Project Q&A",
-      "description": "Answer any question about the RAG Lab application...",
+      "description": "Answer any question about the AI Systems Lab application...",
       "tags": ["rag", "documentation", "qa", "api-reference"]
     },
     {
@@ -51,7 +51,7 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
 **The `skills` list is dynamic.** It always includes:
 
 1. **`project-qa`** — built-in Q&A over the project documentation
-2. **6 native data skills** (`native-list_documents`, `native-list_runs`, `native-get_run_detail`, `native-list_benchmarks`, `native-get_benchmark_results`, `native-get_analytics_summary`) — live queries against the RAG Lab database
+2. **6 native data skills** (`native-list_documents`, `native-list_runs`, `native-get_run_detail`, `native-list_benchmarks`, `native-get_benchmark_results`, `native-get_analytics_summary`) — live queries against the AI Systems Lab database
 3. **One skill per registered MCP server connection** — external tools the agent can reach
 
 If no MCP servers are registered, only the Q&A and native data skills appear.

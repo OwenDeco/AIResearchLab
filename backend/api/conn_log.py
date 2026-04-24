@@ -52,6 +52,7 @@ def log_conn_event(
     caller: Optional[str] = None,
     details: Optional[Dict[str, Any]] = None,
     run_id: Optional[str] = None,
+    write_run_event: bool = True,
 ) -> None:
     """Insert a ConnectionLog row and commit. Silently swallows errors."""
     from models_db import ConnectionLog
@@ -79,7 +80,7 @@ def log_conn_event(
         db.rollback()
         return
 
-    if run_id:
+    if run_id and write_run_event:
         try:
             from models_db import RunEvent as _RE
             _cat = _CATEGORY_MAP.get(event_type, "connection")

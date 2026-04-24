@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Send, Bot, User, ChevronDown, ChevronUp, Loader2, Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
 import { api } from '../api/client'
 import { useAppStore } from '../store/useAppStore'
+import { parseUTC } from '../utils/date'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -76,7 +77,7 @@ function SessionItem({
           <p className="text-xs font-medium truncate pr-10">{session.name}</p>
           <p className="text-[10px] mt-0.5 opacity-60">
             {session.message_count} msg{session.message_count !== 1 ? 's' : ''} ·{' '}
-            {new Date(session.last_active).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {parseUTC(session.last_active).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </p>
           {/* Actions shown on hover */}
           <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1">

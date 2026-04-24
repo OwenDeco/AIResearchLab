@@ -6,6 +6,7 @@ import { ErrorAlert } from '../components/ErrorAlert'
 import { Badge } from '../components/Badge'
 import { Trash2, FileText, GitFork, CheckCircle2, XCircle, Loader2, X, FlaskConical } from 'lucide-react'
 import type { Chunk, Document } from '../types'
+import { parseUTC } from '../utils/date'
 
 type Document_ = Document
 
@@ -397,10 +398,10 @@ export function Ingestion() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-600">Chunk Overlap</label>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Chunk Overlap</label>
                 <input
                   type="number"
-                  className="border border-slate-300 rounded px-2 py-1.5 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm w-24 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={chunkOverlap}
                   min={0}
                   max={512}
@@ -411,9 +412,9 @@ export function Ingestion() {
           )}
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-600">Embedding Model</label>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Embedding Model</label>
             <select
-              className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={embedModel}
               onChange={(e) => setEmbedModel(e.target.value)}
             >
@@ -426,7 +427,7 @@ export function Ingestion() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-600">Extract Graph</label>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Extract Graph</label>
             <div className="flex items-center h-8">
               <input
                 type="checkbox"
@@ -440,13 +441,13 @@ export function Ingestion() {
           {chunkStrategy === 'semantic' && (
             <>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                   Split Percentile
                   <span className="ml-1 text-slate-400 font-normal">(1–99)</span>
                 </label>
                 <input
                   type="number"
-                  className="border border-slate-300 rounded px-2 py-1.5 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm w-24 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={percentileThreshold}
                   min={50}
                   max={99}
@@ -455,12 +456,12 @@ export function Ingestion() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                   Max Chunk Tokens
                 </label>
                 <input
                   type="number"
-                  className="border border-slate-300 rounded px-2 py-1.5 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm w-28 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={maxChunkTokens}
                   min={64}
                   max={4096}
@@ -536,7 +537,7 @@ export function Ingestion() {
         </button>
 
         {samplesOpen && (
-          <div className="px-4 pb-4 border-t border-slate-100">
+          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
             <p className="text-xs text-slate-500 mt-3 mb-3">
               These files are from the <code className="bg-slate-100 px-1 rounded">raw/</code> folder. Select the ones you want to ingest using the settings from the upload form above.
             </p>
@@ -671,22 +672,22 @@ export function Ingestion() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Filename</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Type</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Strategy</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Chunks</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Graph</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 font-medium">Uploaded</th>
-                  <th className="text-left py-2 text-slate-600 font-medium">Actions</th>
+                <tr className="border-b border-slate-200 dark:border-slate-600">
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Filename</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Type</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Strategy</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Chunks</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Graph</th>
+                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Uploaded</th>
+                  <th className="text-left py-2 text-slate-600 dark:text-slate-300 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {documents.map((doc) => (
                   <tr
                     key={doc.id}
-                    className={`border-b border-slate-100 cursor-pointer transition-colors ${
-                      selectedDocId === doc.id ? 'bg-blue-50' : 'hover:bg-slate-50'
+                    className={`border-b border-slate-100 dark:border-slate-700 cursor-pointer transition-colors ${
+                      selectedDocId === doc.id ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
                     }`}
                     onClick={() => selectDoc(doc)}
                   >
@@ -694,8 +695,8 @@ export function Ingestion() {
                     <td className="py-2 pr-4 text-slate-600">
                       <Badge variant="gray">{doc.file_type}</Badge>
                     </td>
-                    <td className="py-2 pr-4 text-slate-600">{doc.chunk_strategy}</td>
-                    <td className="py-2 pr-4 text-slate-600">{doc.chunk_count}</td>
+                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{doc.chunk_strategy}</td>
+                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{doc.chunk_count}</td>
                     <td className="py-2 pr-4">
                       {doc.id in extractProgress ? (() => {
                         const ep = extractProgress[doc.id]
@@ -755,8 +756,8 @@ export function Ingestion() {
                         </button>
                       )}
                     </td>
-                    <td className="py-2 pr-4 text-slate-500">
-                      {new Date(doc.created_at).toLocaleDateString()}
+                    <td className="py-2 pr-4 text-slate-500 dark:text-slate-400">
+                      {parseUTC(doc.created_at).toLocaleDateString()}
                     </td>
                     <td className="py-2">
                       <button
@@ -795,7 +796,7 @@ export function Ingestion() {
             <>
               <div className="space-y-3 mb-4">
                 {chunks.map((chunk, idx) => (
-                  <div key={chunk.id} className="border border-slate-200 rounded-lg p-3">
+                  <div key={chunk.id} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="blue">#{chunkPage * CHUNKS_PER_PAGE + idx + 1}</Badge>
                       <span className="text-xs text-slate-500">
@@ -808,7 +809,7 @@ export function Ingestion() {
                         : chunk.content}
                     </p>
                     {Object.keys(chunk.metadata_json ?? {}).length > 0 && (
-                      <pre className="text-xs text-slate-500 bg-slate-50 rounded p-2 overflow-x-auto">
+                      <pre className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 rounded p-2 overflow-x-auto">
                         {JSON.stringify(chunk.metadata_json, null, 2)}
                       </pre>
                     )}
@@ -819,17 +820,17 @@ export function Ingestion() {
               {/* Pagination */}
               <div className="flex items-center gap-3">
                 <button
-                  className="border border-slate-300 rounded px-3 py-1 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-3 py-1 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   disabled={chunkPage === 0}
                   onClick={() => setChunkPage((p) => p - 1)}
                 >
                   Prev
                 </button>
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-slate-600 dark:text-slate-300">
                   Page {chunkPage + 1} of {Math.max(1, totalPages)}
                 </span>
                 <button
-                  className="border border-slate-300 rounded px-3 py-1 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="border border-slate-300 dark:border-slate-600 rounded px-3 py-1 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   disabled={chunkPage >= totalPages - 1}
                   onClick={() => setChunkPage((p) => p + 1)}
                 >

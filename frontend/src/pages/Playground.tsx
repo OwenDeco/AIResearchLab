@@ -184,9 +184,9 @@ export function Playground() {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700">Models</p>
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">LLM</label>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">LLM</label>
               <select
-                className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
               >
@@ -200,11 +200,11 @@ export function Playground() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Embedding Model
               </label>
               <select
-                className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={embedModel}
                 onChange={(e) => setEmbedModel(e.target.value)}
               >
@@ -218,12 +218,12 @@ export function Playground() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Top K ({topK})
               </label>
               <input
                 type="number"
-                className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={topK}
                 min={1}
                 max={20}
@@ -233,7 +233,7 @@ export function Playground() {
 
             {retrievalMode === 'hybrid' && (
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                   Alpha (vector weight): {alpha.toFixed(1)}
                 </label>
                 <input
@@ -254,11 +254,11 @@ export function Playground() {
 
             {retrievalMode === 'graph_rag' && (
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                   Graph Hops
                 </label>
                 <select
-                  className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={graphHops}
                   onChange={(e) => setGraphHops(Number(e.target.value))}
                 >
@@ -270,7 +270,7 @@ export function Playground() {
             )}
 
             {/* External connection toggle */}
-            <div className="border-t border-slate-100 pt-3">
+            <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -278,8 +278,8 @@ export function Playground() {
                   checked={useExternalConn}
                   onChange={(e) => setUseExternalConn(e.target.checked)}
                 />
-                <Plug size={13} className="text-slate-500" />
-                <span className="text-xs font-medium text-slate-600">Use registered connection</span>
+                <Plug size={13} className="text-slate-500 dark:text-slate-400" />
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Use registered connection</span>
               </label>
 
               {useExternalConn && (
@@ -290,7 +290,7 @@ export function Playground() {
                     </p>
                   ) : (
                     <select
-                      className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={selectedExtConn}
                       onChange={(e) => setSelectedExtConn(e.target.value)}
                     >
@@ -357,16 +357,16 @@ export function Playground() {
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Stage Timings</h3>
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-100">
-                        <th className="text-left py-1 text-slate-500 font-medium text-xs">Stage</th>
-                        <th className="text-right py-1 text-slate-500 font-medium text-xs">ms</th>
+                      <tr className="border-b border-slate-100 dark:border-slate-700">
+                        <th className="text-left py-1 text-slate-500 dark:text-slate-400 font-medium text-xs">Stage</th>
+                        <th className="text-right py-1 text-slate-500 dark:text-slate-400 font-medium text-xs">ms</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.entries(result.stage_timings).map(([stage, ms]) => (
-                        <tr key={stage} className="border-b border-slate-50">
+                        <tr key={stage} className="border-b border-slate-50 dark:border-slate-700">
                           <td className="py-1 text-slate-700 dark:text-slate-200">{stage}</td>
-                          <td className="py-1 text-right text-slate-600 font-mono">
+                          <td className="py-1 text-right text-slate-600 dark:text-slate-300 font-mono">
                             {Number(ms).toFixed(1)}
                           </td>
                         </tr>

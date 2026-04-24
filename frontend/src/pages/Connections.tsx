@@ -46,12 +46,12 @@ interface ConnectionsData {
 
 function StatusBadge({ status }: { status: Connection['status'] }) {
   const map = {
-    active:         { label: 'Active',          color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: <CheckCircle2 size={12} /> },
-    configured:     { label: 'Configured',      color: 'bg-blue-100 text-blue-700 border-blue-200',         icon: <CheckCircle2 size={12} /> },
-    not_configured: { label: 'Not configured',  color: 'bg-slate-100 text-slate-500 border-slate-200',      icon: <AlertCircle size={12} /> },
-    inactive:       { label: 'Inactive',          color: 'bg-slate-100 text-slate-500 border-slate-200',      icon: <AlertCircle size={12} /> },
-    unreachable:    { label: 'Unreachable',      color: 'bg-amber-100 text-amber-700 border-amber-200',      icon: <AlertCircle size={12} /> },
-    error:          { label: 'Error',            color: 'bg-red-100 text-red-700 border-red-200',            icon: <XCircle size={12} /> },
+    active:         { label: 'Active',         color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700', icon: <CheckCircle2 size={12} /> },
+    configured:     { label: 'Configured',     color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700',                 icon: <CheckCircle2 size={12} /> },
+    not_configured: { label: 'Not configured', color: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600',             icon: <AlertCircle size={12} /> },
+    inactive:       { label: 'Inactive',       color: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600',             icon: <AlertCircle size={12} /> },
+    unreachable:    { label: 'Unreachable',    color: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700',          icon: <AlertCircle size={12} /> },
+    error:          { label: 'Error',          color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700',                      icon: <XCircle size={12} /> },
   }
   const { label, color, icon } = map[status] ?? map.not_configured
   return (
@@ -72,7 +72,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
+      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
       title="Copy URL"
     >
       {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
@@ -105,16 +105,16 @@ interface AgentCardData {
 
 function SkillTagBadge({ tag }: { tag: string }) {
   const colors: Record<string, string> = {
-    native:        'bg-emerald-50 text-emerald-700 border-emerald-200',
-    data:          'bg-emerald-50 text-emerald-700 border-emerald-200',
-    mcp:           'bg-blue-50 text-blue-700 border-blue-200',
-    external:      'bg-blue-50 text-blue-700 border-blue-200',
-    rag:           'bg-violet-50 text-violet-700 border-violet-200',
-    documentation: 'bg-violet-50 text-violet-700 border-violet-200',
-    qa:            'bg-violet-50 text-violet-700 border-violet-200',
-    'api-reference': 'bg-violet-50 text-violet-700 border-violet-200',
+    native:        'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700',
+    data:          'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700',
+    mcp:           'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+    external:      'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+    rag:           'bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700',
+    documentation: 'bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700',
+    qa:            'bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700',
+    'api-reference': 'bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700',
   }
-  const cls = colors[tag] ?? 'bg-slate-100 text-slate-600 border-slate-200'
+  const cls = colors[tag] ?? 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'
   return (
     <span className={`text-xs px-1.5 py-0.5 rounded border font-mono ${cls}`}>{tag}</span>
   )
@@ -154,7 +154,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
           <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Agent Card</span>
           <span className="text-xs text-slate-400">/.well-known/agent.json</span>
           {card && (
-            <span className="text-xs bg-violet-50 text-violet-700 border border-violet-200 px-1.5 py-0.5 rounded font-mono">
+            <span className="text-xs bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded font-mono">
               v{card.version}
             </span>
           )}
@@ -166,7 +166,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
       </button>
 
       {expanded && (
-        <div className="px-5 pb-5 space-y-4 border-t border-slate-100">
+        <div className="px-5 pb-5 space-y-4 border-t border-slate-100 dark:border-slate-700">
           {error && (
             <p className="text-xs text-red-500 flex items-center gap-1 pt-4">
               <XCircle size={12} />{error}
@@ -178,22 +178,22 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
               {/* Identity */}
               <div className="pt-4">
                 <div className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-0.5">{card.name}</div>
-                <p className="text-xs text-slate-500 leading-relaxed">{card.description}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{card.description}</p>
               </div>
 
               {/* Capabilities */}
               <div>
-                <p className="text-xs font-medium text-slate-500 mb-2">Capabilities</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Capabilities</p>
                 <div className="flex flex-wrap gap-2">
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border font-medium ${card.capabilities.streaming ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border font-medium ${card.capabilities.streaming ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-600'}`}>
                     {card.capabilities.streaming ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
                     Streaming
                   </span>
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border font-medium ${card.capabilities.pushNotifications ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border font-medium ${card.capabilities.pushNotifications ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-600'}`}>
                     {card.capabilities.pushNotifications ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
                     Push Notifications
                   </span>
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border font-medium ${card.capabilities.stateTransitionHistory ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border font-medium ${card.capabilities.stateTransitionHistory ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-600'}`}>
                     {card.capabilities.stateTransitionHistory ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
                     State History
                   </span>
@@ -201,7 +201,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
                 {card.capabilities.methods && card.capabilities.methods.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {card.capabilities.methods.map((m) => (
-                      <span key={m} className="text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded">
+                      <span key={m} className="text-xs font-mono bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">
                         {m}
                       </span>
                     ))}
@@ -213,11 +213,11 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
               <div>
                 <button
                   onClick={() => setSkillsExpanded((v) => !v)}
-                  className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-2 hover:text-slate-700 dark:text-slate-200 transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                 >
                   {skillsExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                   Skills
-                  <span className="bg-slate-100 text-slate-500 border border-slate-200 text-xs px-1.5 py-0.5 rounded-full font-mono">
+                  <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 text-xs px-1.5 py-0.5 rounded-full font-mono">
                     {card.skills.length}
                   </span>
                 </button>
@@ -227,7 +227,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
                     {card.skills.map((skill) => (
                       <div
                         key={skill.id}
-                        className="border border-slate-200 rounded-lg p-3 bg-slate-50"
+                        className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50 dark:bg-slate-700/50"
                       >
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{skill.name}</span>
@@ -235,7 +235,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
                             {skill.tags?.map((t) => <SkillTagBadge key={t} tag={t} />)}
                           </div>
                         </div>
-                        <p className="text-xs text-slate-500 leading-relaxed">{skill.description}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{skill.description}</p>
                         {skill.examples && skill.examples.length > 0 && (
                           <div className="mt-1.5 flex flex-wrap gap-1">
                             {skill.examples.map((ex) => (
@@ -253,8 +253,8 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
 
               {/* Task URL */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-400 w-20 flex-shrink-0">Task URL</span>
-                <span className="font-mono text-slate-600 truncate flex-1 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                <span className="text-slate-400 dark:text-slate-500 w-20 flex-shrink-0">Task URL</span>
+                <span className="font-mono text-slate-600 dark:text-slate-300 truncate flex-1 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
                   {card.url}
                 </span>
                 <CopyButton text={card.url} />
@@ -277,9 +277,9 @@ function ConnectionCard({ conn }: { conn: Connection }) {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{conn.name}</span>
-            <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-mono">{conn.protocol}</span>
+            <span className="text-xs text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded font-mono">{conn.protocol}</span>
           </div>
-          <p className="text-xs text-slate-500 leading-relaxed">{conn.description}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{conn.description}</p>
         </div>
         <StatusBadge status={conn.status} />
       </div>
@@ -290,7 +290,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
           {conn.endpoints.map((ep) => (
             <div key={ep.label} className="flex items-center gap-2 text-xs">
               <span className="text-slate-400 w-24 flex-shrink-0">{ep.label}</span>
-              <span className="font-mono text-slate-700 dark:text-slate-200 truncate flex-1 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+              <span className="font-mono text-slate-700 dark:text-slate-200 truncate flex-1 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
                 {ep.url}
               </span>
               {ep.url.startsWith('http') && <CopyButton text={ep.url} />}
@@ -311,7 +311,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
           <p className="text-xs text-slate-400 mb-1.5">Methods</p>
           <div className="flex flex-wrap gap-1">
             {conn.methods.map((m) => (
-              <span key={m} className="text-xs font-mono bg-violet-50 text-violet-700 border border-violet-200 px-1.5 py-0.5 rounded">
+              <span key={m} className="text-xs font-mono bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded">
                 {m}
               </span>
             ))}
@@ -325,7 +325,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
           <p className="text-xs text-slate-400 mb-1.5">Models</p>
           <div className="flex flex-wrap gap-1">
             {conn.models.map((m) => (
-              <span key={m} className="text-xs font-mono bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded">
+              <span key={m} className="text-xs font-mono bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded">
                 {m}
               </span>
             ))}
@@ -451,7 +451,7 @@ function RegisteredCard({
   }
 
   const tags = conn.type === 'a2a' ? conn.skills ?? [] : conn.tools ?? []
-  const tagColor = conn.type === 'a2a' ? 'bg-violet-50 text-violet-700 border-violet-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+  const tagColor = conn.type === 'a2a' ? 'bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700' : 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700'
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex flex-col gap-3">
@@ -460,16 +460,16 @@ function RegisteredCard({
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{conn.name}</span>
-            <span className={`text-xs px-1.5 py-0.5 rounded font-mono border ${conn.type === 'a2a' ? 'bg-violet-50 text-violet-700 border-violet-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+            <span className={`text-xs px-1.5 py-0.5 rounded font-mono border ${conn.type === 'a2a' ? 'bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700' : 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700'}`}>
               {conn.type.toUpperCase()}
             </span>
             {conn.type === 'mcp' && conn.transport && (
-              <span className="text-xs px-1.5 py-0.5 rounded font-mono border bg-slate-50 text-slate-500 border-slate-200">
+              <span className="text-xs px-1.5 py-0.5 rounded font-mono border bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600">
                 {conn.transport === 'streamable_http' ? 'Streamable HTTP' : 'SSE'}
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 line-clamp-2">{conn.description}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{conn.description}</p>
         </div>
         <button
           onClick={() => onDelete(conn.id)}
@@ -483,7 +483,7 @@ function RegisteredCard({
       {/* URL */}
       <div className="text-xs flex items-center gap-2">
         <span className="text-slate-400 w-16 flex-shrink-0">{conn.type === 'a2a' ? 'Task URL' : 'Server URL'}</span>
-        <span className="font-mono text-slate-600 truncate flex-1 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+        <span className="font-mono text-slate-600 dark:text-slate-300 truncate flex-1 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
           {conn.type === 'a2a' ? conn.task_url : conn.server_url}
         </span>
         <CopyButton text={(conn.type === 'a2a' ? conn.task_url : conn.server_url) ?? ''} />
@@ -500,9 +500,9 @@ function RegisteredCard({
 
       {/* Agent tool toggle — MCP and A2A */}
       {onToggleAgentTool && (
-        <div className="flex items-center justify-between py-1 border-t border-slate-100">
+        <div className="flex items-center justify-between py-1 border-t border-slate-100 dark:border-slate-700">
           <div>
-            <span className="text-xs font-medium text-slate-600">Use as agent tool</span>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Use as agent tool</span>
             <p className="text-xs text-slate-400">Expose to the agent's tool-calling loop</p>
           </div>
           <button
@@ -535,11 +535,11 @@ function RegisteredCard({
 
       {/* Test panel */}
       {showTest && (
-        <div className="border border-slate-200 rounded-lg p-3 flex flex-col gap-3 bg-slate-50">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex flex-col gap-3 bg-slate-50 dark:bg-slate-700/40">
           {conn.type === 'a2a' ? (
             /* A2A: simple connectivity ping */
             <div className="flex flex-col gap-2">
-              <p className="text-xs text-slate-500">Send a connectivity ping to the A2A agent.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Send a connectivity ping to the A2A agent.</p>
               <div className="flex items-center gap-3">
                 <button
                   onClick={handlePing}
@@ -564,7 +564,7 @@ function RegisteredCard({
             <>
               {/* Tool selector */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-500 font-medium">Tool</label>
+                <label className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tool</label>
                 <select
                   value={selectedTool}
                   onChange={(e) => handleToolSelect(e.target.value)}
@@ -582,13 +582,13 @@ function RegisteredCard({
               {/* Input fields */}
               {activeTool && Object.keys(activeTool.inputSchema?.properties ?? {}).length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs text-slate-500 font-medium">Inputs</label>
+                  <label className="text-xs text-slate-500 dark:text-slate-400 font-medium">Inputs</label>
                   {Object.entries(activeTool.inputSchema.properties!).map(([key, def]) => {
                     const required = activeTool.inputSchema.required?.includes(key)
                     const d = def as any
                     return (
                       <div key={key} className="flex flex-col gap-0.5">
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-slate-600 dark:text-slate-300">
                           {key}{required ? <span className="text-red-400 ml-0.5">*</span> : ''}
                           {d.description && <span className="text-slate-400 ml-1 font-normal">— {d.description}</span>}
                         </label>
@@ -617,7 +617,7 @@ function RegisteredCard({
                             value={inputValues[key] ?? ''}
                             onChange={(e) => setInputValues((p) => ({ ...p, [key]: e.target.value }))}
                             placeholder={d.type ?? 'string'}
-                            className="border border-slate-300 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-xs font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         )}
                       </div>
@@ -812,12 +812,12 @@ export function Connections() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Connections</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Protocols exposed by this lab and external services it consumes</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Protocols exposed by this lab and external services it consumes</p>
         </div>
         <button
           onClick={() => load(true)}
           disabled={refreshing}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 disabled:opacity-50"
         >
           <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
           Refresh
@@ -857,7 +857,7 @@ export function Connections() {
                 <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Public Access</span>
                 {ngrok.running
                   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-emerald-100 text-emerald-700 border-emerald-200"><CheckCircle2 size={12} />Tunnel active</span>
-                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-slate-100 text-slate-500 border-slate-200"><AlertCircle size={12} />Local only</span>}
+                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600"><AlertCircle size={12} />Local only</span>}
               </div>
 
               {/* ngrok section */}
@@ -865,16 +865,16 @@ export function Connections() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-medium text-slate-700 dark:text-slate-200">ngrok</span>
-                    <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-mono">HTTPS</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded font-mono">HTTPS</span>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Start an automated HTTPS tunnel to expose this lab publicly.
                   </p>
                   {ngrok.running && ngrok.url && (
                     <div className="mt-2">
                       <div className="flex items-center gap-2 text-xs">
                         <span className="text-slate-400 flex-shrink-0 w-20">Tunnel URL</span>
-                        <span className="font-mono text-slate-700 dark:text-slate-200 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate flex-1">
+                        <span className="font-mono text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600 truncate flex-1">
                           {ngrok.url}
                         </span>
                         <CopyButton text={ngrok.url} />
@@ -935,7 +935,7 @@ export function Connections() {
                 <button
                   key={t}
                   onClick={() => setRegTab(t)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${regTab === t ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${regTab === t ? 'bg-slate-800 dark:bg-slate-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                 >
                   {t === 'a2a' ? 'A2A Agents' : 'MCP Servers'}
                   {(regTab === 'a2a' ? registered.a2a : registered.mcp).length > 0 && (
@@ -951,21 +951,21 @@ export function Connections() {
               <div className="space-y-4">
                 {/* Registration form */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
-                  <p className="text-xs font-medium text-slate-600 mb-3">Register A2A Agent</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-3">Register A2A Agent</p>
                   <div className="flex flex-wrap gap-2 items-end">
                     <div className="flex flex-col gap-1 flex-1 min-w-32">
-                      <label className="text-xs text-slate-500">Name</label>
+                      <label className="text-xs text-slate-500 dark:text-slate-400">Name</label>
                       <input
-                        className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
                         placeholder="My Agent"
                         value={a2aName}
                         onChange={(e) => setA2aName(e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col gap-1 flex-[3] min-w-48">
-                      <label className="text-xs text-slate-500">Agent Card URL</label>
+                      <label className="text-xs text-slate-500 dark:text-slate-400">Agent Card URL</label>
                       <input
-                        className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 font-mono"
+                        className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 font-mono"
                         placeholder="https://host/.well-known/agent.json"
                         value={a2aCardUrl}
                         onChange={(e) => setA2aCardUrl(e.target.value)}
@@ -1000,29 +1000,29 @@ export function Connections() {
               <div className="space-y-4">
                 {/* Registration form */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
-                  <p className="text-xs font-medium text-slate-600 mb-3">Register MCP Server</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-3">Register MCP Server</p>
                   <div className="flex flex-wrap gap-2 items-end">
                     <div className="flex flex-col gap-1 flex-1 min-w-32">
-                      <label className="text-xs text-slate-500">Name</label>
+                      <label className="text-xs text-slate-500 dark:text-slate-400">Name</label>
                       <input
-                        className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="My MCP Server"
                         value={mcpName}
                         onChange={(e) => setMcpName(e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col gap-1 flex-[3] min-w-48">
-                      <label className="text-xs text-slate-500">Server URL</label>
+                      <label className="text-xs text-slate-500 dark:text-slate-400">Server URL</label>
                       <input
-                        className="border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                        className="border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                         placeholder="https://host/mcp"
                         value={mcpUrl}
                         onChange={(e) => setMcpUrl(e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs text-slate-500">Transport</label>
-                      <div className="flex items-center gap-1 border border-slate-300 rounded overflow-hidden text-xs">
+                      <label className="text-xs text-slate-500 dark:text-slate-400">Transport</label>
+                      <div className="flex items-center gap-1 border border-slate-300 dark:border-slate-600 rounded overflow-hidden text-xs">
                         {(['sse', 'streamable_http'] as const).map((t) => (
                           <button
                             key={t}

@@ -1,8 +1,8 @@
-# RAG Lab — Project Overview
+# AI Systems Lab — Project Overview
 
 ## What It Is
 
-**RAG Lab** is a production-style full-stack application for ingesting documents, comparing multiple Retrieval-Augmented Generation (RAG) pipelines, running automated benchmarks, and visualizing cost/latency/quality tradeoffs. It is a research and experimentation platform — not a chatbot product.
+**AI Systems Lab** (v2.0) is a production-style full-stack application for ingesting documents, comparing multiple Retrieval-Augmented Generation (RAG) pipelines, running automated benchmarks, and visualizing cost/latency/quality tradeoffs. It is a research and experimentation platform — not a chatbot product.
 
 ## Architecture
 
@@ -22,7 +22,7 @@ backend/
   models_db.py      ORM models
   config.py         Settings loaded from .env
   main.py           FastAPI app entry point
-docs/               This documentation (used by the RAG Lab Agent)
+docs/               This documentation (used by the AI Systems Lab Agent)
   raw/                Sample documents for lab ingestion
 ```
 
@@ -68,9 +68,12 @@ Key SQLAlchemy models defined in `backend/models_db.py`:
 | Analytics | `/analytics` | Filter and compare cost, latency, quality by model/mode/strategy/date |
 | Settings | `/settings` | Provider API keys, agent toggles, custom model IDs |
 | Connections | `/connections` | Exposed protocols, consumed services, ngrok tunnel, registered connections |
-| Agent | `/agent` | Full-page chat with the RAG Lab Agent, persistent sessions |
+| Agent | `/agent` | Full-page chat with the AI Systems Lab Agent, persistent sessions |
 | Logs | `/logs` | Audit trail for all connection events |
 | Runs | `/runs` | Cross-domain run browser with domain/type/status filters, step timeline, and event log |
+| Agents | `/agents` | Create and manage named agent configs; chat with any agent; configure RAG, tools, and sub-agents |
+| Agent Flow | `/flow` | Force-directed graph of all agents, MCP servers, and A2A connections; drag-to-persist layout |
+| Pixel Simulator | `/orchestration-simulator` | Pixel-art orchestration simulator (Agent Simulation mode) and Debate Room mode |
 
 ## Running the Application
 
@@ -83,11 +86,11 @@ npm run dev          # dev server on port 5173
 npm run build        # production build to dist/
 ```
 
-There is a desktop launcher: `RAG Lab.bat` on the desktop starts both servers and opens the browser.
+There is a desktop launcher: `AI Systems Lab.bat` on the desktop starts both servers and opens the browser.
 
 ## Exposed Protocols
 
-The RAG Lab exposes its agent capability over three protocols simultaneously:
+The AI Systems Lab exposes its agent capability over three protocols simultaneously:
 
 | Protocol | Endpoint | Purpose |
 |---|---|---|

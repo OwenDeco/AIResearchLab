@@ -6,6 +6,7 @@ import { ErrorAlert } from '../components/ErrorAlert'
 import { Badge } from '../components/Badge'
 import { Trash2, Plus, ChevronDown, ChevronRight, HelpCircle, X } from 'lucide-react'
 import type { BenchmarkQuestion, BenchmarkConfig, BenchmarkRun, BenchmarkResult } from '../types'
+import { parseUTC } from '../utils/date'
 
 const RETRIEVAL_MODES = [
   'lexical',
@@ -656,7 +657,7 @@ export function BenchmarkLab() {
                       {run.completed_questions}/{run.total_questions}
                     </td>
                     <td className="py-2 pr-4 text-slate-500">
-                      {new Date(run.created_at).toLocaleDateString()}
+                      {parseUTC(run.created_at).toLocaleDateString()}
                     </td>
                     <td className="py-2">
                       {run.status === 'completed' && (

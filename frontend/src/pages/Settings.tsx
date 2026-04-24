@@ -319,7 +319,7 @@ export function Settings() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-1">Settings</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Settings</h1>
       <p className="text-sm text-slate-500 mb-6">
         Changes are written to <code className="bg-slate-100 px-1 rounded">.env</code> and applied immediately — no restart required.
       </p>
@@ -336,7 +336,7 @@ export function Settings() {
         {/* OpenAI */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-slate-800">OpenAI</h2>
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">OpenAI</h2>
             <StatusBadge active={openaiActive} />
           </div>
           <div className="space-y-3">
@@ -349,7 +349,7 @@ export function Settings() {
             </Field>
             <Field label="Notes" hint="Optional — describe what this credential is for, e.g. supported models or project.">
               <textarea
-                className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 rows={2}
                 value={notes.openai}
                 onChange={(e) => { setSaved(false); setNotes((p) => ({ ...p, openai: e.target.value })) }}
@@ -362,7 +362,7 @@ export function Settings() {
         {/* Azure OpenAI */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-slate-800">Azure OpenAI</h2>
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">Azure OpenAI</h2>
             <StatusBadge active={azureActive} />
           </div>
           <div className="space-y-3">
@@ -375,7 +375,7 @@ export function Settings() {
             <Field label="Endpoint" hint="e.g. https://my-resource.openai.azure.com">
               <input
                 type="text"
-                className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.azure_endpoint}
                 onChange={(e) => set('azure_endpoint', e.target.value)}
                 placeholder="https://…"
@@ -384,7 +384,7 @@ export function Settings() {
             <Field label="Deployment name" hint="The name you gave the model deployment in Azure">
               <input
                 type="text"
-                className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.azure_deployment}
                 onChange={(e) => set('azure_deployment', e.target.value)}
                 placeholder="gpt-4o"
@@ -392,7 +392,7 @@ export function Settings() {
             </Field>
             <Field label="Notes" hint="Optional — describe what this credential is for, e.g. supported models or project.">
               <textarea
-                className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 rows={2}
                 value={notes.azure}
                 onChange={(e) => { setSaved(false); setNotes((p) => ({ ...p, azure: e.target.value })) }}
@@ -405,14 +405,14 @@ export function Settings() {
         {/* Ollama */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-slate-800">Ollama</h2>
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">Ollama</h2>
             <StatusBadge active={ollamaActive} />
           </div>
           <div className="space-y-3">
             <Field label="Base URL">
               <input
                 type="text"
-                className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.ollama_base_url}
                 onChange={(e) => set('ollama_base_url', e.target.value)}
                 placeholder="http://localhost:11434"
@@ -420,7 +420,7 @@ export function Settings() {
             </Field>
             <Field label="Notes" hint="Optional — describe what this credential is for, e.g. supported models or project.">
               <textarea
-                className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 rows={2}
                 value={notes.ollama}
                 onChange={(e) => { setSaved(false); setNotes((p) => ({ ...p, ollama: e.target.value })) }}
@@ -466,7 +466,7 @@ export function Settings() {
           hint="Model used for tool selection and response synthesis. Must support function/tool calling."
         >
           <select
-            className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={agentModel}
             onChange={(e) => { setAgentModel(e.target.value); setSavedA2A(false) }}
           >
@@ -481,9 +481,9 @@ export function Settings() {
         </Field>
 
         {/* Synthesis toggle */}
-        <div className="flex items-start justify-between gap-4 pt-1 border-t border-slate-100">
+        <div className="flex items-start justify-between gap-4 pt-1 border-t border-slate-100 dark:border-slate-700">
           <div>
-            <p className="text-sm font-medium text-slate-700">Synthesize responses</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Synthesize responses</p>
             <p className="text-xs text-slate-400 mt-0.5">
               When enabled, the agent runs a second LLM call to turn raw tool results into a natural-language answer.
               Disable when the caller has its own LLM — raw tool output is returned directly, skipping the synthesis round-trip.
@@ -530,7 +530,7 @@ export function Settings() {
       <div className="space-y-4">
         {/* LLMs */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">LLM models</h3>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">LLM models</h3>
           <div className="space-y-1 mb-3">
             {customLlms.length === 0 && (
               <p className="text-xs text-slate-400">No LLMs added yet.</p>
@@ -538,9 +538,9 @@ export function Settings() {
             {customLlms.map((m) => {
               const isDefault = m === agentModel
               return (
-                <div key={m} className="flex items-center justify-between bg-slate-50 rounded px-2 py-1">
+                <div key={m} className="flex items-center justify-between bg-slate-50 dark:bg-slate-700 rounded px-2 py-1">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-mono text-slate-700 truncate">{m}</span>
+                    <span className="text-xs font-mono text-slate-700 dark:text-slate-200 truncate">{m}</span>
                     {isDefault && (
                       <span className="shrink-0 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5 leading-none">
                         agent default
@@ -567,14 +567,14 @@ export function Settings() {
           <div className="flex gap-2">
             <input
               type="text"
-              className="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. openai/gpt-4.1 or ollama/gemma3"
               value={newLlm}
               onChange={(e) => setNewLlm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addLlm()}
             />
             <button
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 rounded px-3 py-1.5 text-sm flex items-center gap-1"
+              className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded px-3 py-1.5 text-sm flex items-center gap-1"
               onClick={() => addLlm()}
             >
               <Plus size={14} /> Add
@@ -585,14 +585,14 @@ export function Settings() {
 
         {/* Embedding models */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">Embedding models</h3>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Embedding models</h3>
           <div className="space-y-1 mb-3">
             {customEmbeds.length === 0 && (
               <p className="text-xs text-slate-400">No embedding models added yet.</p>
             )}
             {customEmbeds.map((m) => (
-              <div key={m} className="flex items-center justify-between bg-slate-50 rounded px-2 py-1">
-                <span className="text-xs font-mono text-slate-700">{m}</span>
+              <div key={m} className="flex items-center justify-between bg-slate-50 dark:bg-slate-700 rounded px-2 py-1">
+                <span className="text-xs font-mono text-slate-700 dark:text-slate-200">{m}</span>
                 <button
                   className="text-red-400 hover:text-red-600 ml-2"
                   onClick={() => removeEmbed(m)}
@@ -606,14 +606,14 @@ export function Settings() {
           <div className="flex gap-2">
             <input
               type="text"
-              className="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. openai/text-embedding-3-small"
               value={newEmbed}
               onChange={(e) => setNewEmbed(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addEmbed()}
             />
             <button
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 rounded px-3 py-1.5 text-sm flex items-center gap-1"
+              className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded px-3 py-1.5 text-sm flex items-center gap-1"
               onClick={() => addEmbed()}
             >
               <Plus size={14} /> Add

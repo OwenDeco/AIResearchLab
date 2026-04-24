@@ -259,6 +259,8 @@ from api.routes.logs import router as logs_router                               
 from api.routes.mcp_server import mcp_sse_app                                     # noqa: E402
 from api.routes.analytics import router as analytics_router                        # noqa: E402
 from api.routes.unified_runs import router as unified_runs_router                  # noqa: E402
+from api.routes.agent_configs import router as agent_configs_router                # noqa: E402
+from api.routes.debate import router as debate_router                              # noqa: E402
 
 app.include_router(documents_router, prefix="/api")
 app.include_router(models_router, prefix="/api")
@@ -274,6 +276,8 @@ app.include_router(ngrok_router, prefix="/api")
 app.include_router(logs_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
 app.include_router(unified_runs_router, prefix="/api")
+app.include_router(agent_configs_router, prefix="/api")
+app.include_router(debate_router, prefix="/api")
 app.include_router(a2a_router)           # no /api prefix — A2A lives at root
 app.mount("/mcp", mcp_sse_app)           # MCP SSE transport: /mcp/sse + /mcp/messages
 

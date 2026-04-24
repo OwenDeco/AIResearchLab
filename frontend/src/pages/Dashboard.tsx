@@ -14,6 +14,7 @@ import { useAppStore } from '../store/useAppStore'
 import { Spinner } from '../components/Spinner'
 import { ErrorAlert } from '../components/ErrorAlert'
 import type { Run } from '../types'
+import { parseUTC } from '../utils/date'
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -144,7 +145,7 @@ export function Dashboard() {
                     <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{run.latency_ms?.toFixed(0)}ms</td>
                     <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">${run.estimated_cost_usd?.toFixed(4)}</td>
                     <td className="py-2 text-slate-500 dark:text-slate-400">
-                      {new Date(run.created_at).toLocaleDateString()}
+                      {parseUTC(run.created_at).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}

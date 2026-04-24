@@ -1,6 +1,6 @@
 # MCP (Model Context Protocol) Server
 
-The RAG Lab exposes an MCP server that allows Claude Desktop, Claude.ai, and other MCP-compatible clients to call the `ask_rag_lab` tool directly — answering any question about the application using the same LLM + documentation pipeline as the A2A agent.
+The AI Systems Lab exposes an MCP server that allows Claude Desktop, Claude.ai, and other MCP-compatible clients to call the `ask_rag_lab` tool directly — answering any question about the application using the same LLM + documentation pipeline as the A2A agent.
 
 ---
 
@@ -28,7 +28,7 @@ When exposed via ngrok, replace `http://localhost:8002` with the tunnel URL.
 
 ### ask_rag_lab
 
-**Description:** Answer any question about the RAG Lab application using the project documentation and live data tools.
+**Description:** Answer any question about the AI Systems Lab application using the project documentation and live data tools.
 
 **Input:**
 | Parameter | Type | Description |
@@ -68,7 +68,7 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "rag-lab": {
+    "ai-systems-lab": {
       "transport": {
         "type": "sse",
         "url": "http://localhost:8002/mcp/sse"

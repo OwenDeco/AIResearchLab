@@ -3,9 +3,9 @@ import {
   LayoutDashboard,
   Upload,
   Network,
-  MessageSquare,
   Bot,
   Gamepad2,
+  GitBranch,
   Plug,
   FlaskConical,
   BarChart3,
@@ -37,7 +37,8 @@ const navGroups: Array<{
   {
     label: 'Orchestration & Runtime',
     items: [
-      { to: '/playground', icon: MessageSquare, label: 'Runtime Playground' },
+      { to: '/agents', icon: Bot, label: 'Agents' },
+      { to: '/flow', icon: GitBranch, label: 'Agent Flow' },
       { to: '/orchestration/simulator', icon: Gamepad2, label: 'Pixel Simulator' },
     ],
   },
@@ -98,7 +99,7 @@ export function Layout() {
       <aside className="fixed top-0 left-0 h-full w-60 bg-slate-900 text-white flex flex-col z-10">
         {/* Title */}
         <div className="text-white font-bold text-lg p-4 border-b border-slate-700">
-          🔬 RAG Lab
+          🔬 AI Systems Lab
         </div>
 
         {/* Nav groups */}
@@ -116,7 +117,7 @@ export function Layout() {
         </nav>
 
         <div className="px-4 py-3 border-t border-slate-700 flex items-center justify-between">
-          <span className="text-xs text-slate-500">RAG Lab v1.0</span>
+          <span className="text-xs text-slate-500">AI Systems Lab v2.0</span>
           <button
             onClick={toggleDarkMode}
             title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}

@@ -482,6 +482,70 @@ export const api = {
     await http.delete(`/analytics/system-costs/${id}`)
   },
 
+  // ---- Agent Configs ----
+
+  async listAgentConfigs(): Promise<any[]> {
+    const res = await http.get('/agent-configs')
+    return res.data
+  },
+
+  async createAgentConfig(data: {
+    name: string
+    role: string
+    system_prompt: string
+    tools: { mcp_connection_ids: string[]; a2a_connection_ids: string[]; use_own_a2a: boolean }
+    rag: { enabled: boolean; retrieval_mode: string; model_name: string; embed_model: string; top_k: number }
+  }): Promise<any> {
+    const res = await http.post('/agent-configs', data)
+    return res.data
+  },
+
+  async updateAgentConfig(id: string, data: {
+    name: string
+    role: string
+    system_prompt: string
+    tools: { mcp_connection_ids: string[]; a2a_connection_ids: string[]; use_own_a2a: boolean }
+    rag: { enabled: boolean; retrieval_mode: string; model_name: string; embed_model: string; top_k: number }
+  }): Promise<any> {
+    const res = await http.put(`/agent-configs/${id}`, data)
+    return res.data
+  },
+
+  async deleteAgentConfig(id: string): Promise<void> {
+    await http.delete(`/agent-configs/${id}`)
+  },
+
+  async chatWithAgentConfig(
+    id: string,
+    message: string,
+    history: { role: string; content: string }[]
+  ): Promise<{ answer: string; latency_ms: number; rag_used: boolean }> {
+    const res = await http.post(`/agent-configs/${id}/chat`, { message, history })
+    return res.data
+  },
+
+  // ---- Debate ----
+
+  async startDebate(body: {
+    host_id: string
+    guest_ids: string[]
+    topic: string
+    rounds: number
+  }): Promise<{ session_id: string }> {
+    const res = await http.post('/debate/start', body)
+    return res.data
+  },
+
+  async listDebateSessions(): Promise<any[]> {
+    const res = await http.get('/debate')
+    return res.data
+  },
+
+  async getDebateSession(sessionId: string): Promise<any> {
+    const res = await http.get(`/debate/${sessionId}`)
+    return res.data
+  },
+
   // ---- Unified Runs ----
 
   getUnifiedRuns(params?: { domain?: string; run_type?: string; status?: string; limit?: number; offset?: number }) {
@@ -498,5 +562,9 @@ export const api = {
 
   getRunEvents(runId: string) {
     return http.get(`/unified-runs/${runId}/events`).then(r => r.data)
+  },
+
+  getRunLive(runId: string, since?: string) {
+    return http.get(`/unified-runs/${runId}/live`, { params: since ? { since } : {} }).then(r => r.data)
   },
 }

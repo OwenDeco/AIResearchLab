@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
 import { api } from '../api/client'
 import { Spinner } from '../components/Spinner'
+import { parseUTC } from '../utils/date'
 
 interface RunSummary {
   name?: string
@@ -74,12 +75,12 @@ function domainColor(domain: string): string {
 function DomainBadge({ domain }: { domain: string }) {
   const c = domainColor(domain)
   const classes: Record<string, string> = {
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    green: 'bg-green-50 text-green-700 border-green-200',
-    orange: 'bg-orange-50 text-orange-700 border-orange-200',
-    teal: 'bg-teal-50 text-teal-700 border-teal-200',
-    rose: 'bg-rose-50 text-rose-700 border-rose-200',
-    slate: 'bg-slate-50 text-slate-700 dark:text-slate-200 border-slate-200',
+    blue: 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+    green: 'bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700',
+    orange: 'bg-orange-50 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-700',
+    teal: 'bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-700',
+    rose: 'bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-700',
+    slate: 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600',
   }
   return (
     <span className={`inline-flex items-center text-xs font-medium border rounded-full px-2 py-0.5 ${classes[c] || classes.slate}`}>
@@ -90,12 +91,12 @@ function DomainBadge({ domain }: { domain: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    running: 'bg-amber-50 text-amber-700 border-amber-200',
-    completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    failed: 'bg-red-50 text-red-700 border-red-200',
+    running: 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700',
+    completed: 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700',
+    failed: 'bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700',
   }
   return (
-    <span className={`inline-flex text-xs font-medium border rounded-full px-2 py-0.5 ${map[status] || 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+    <span className={`inline-flex text-xs font-medium border rounded-full px-2 py-0.5 ${map[status] || 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'}`}>
       {status}
     </span>
   )
@@ -110,125 +111,161 @@ function formatDuration(startedAt: string, endedAt: string | null): string {
 
 // ---- RunDetail ----
 
+const STEP_COLORS: Record<string, string> = {
+  retrieve_chunks: '#3b82f6',
+  rag_retrieval: '#3b82f6',
+  llm_call: '#a855f7',
+  tool_call: '#f59e0b',
+  mcp_tool_call: '#f59e0b',
+  a2a_tool_call: '#f97316',
+  score_answer: '#22c55e',
+  agent_handoff: '#f97316',
+  embed_query: '#14b8a6',
+}
+
+const CAT_CLASSES: Record<string, string> = {
+  execution: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  data: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
+  ai: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+  connection: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+  evaluation: 'bg-green-500/10 text-green-400 border-green-500/30',
+  governance: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+}
+
 function RunDetail({ run, steps, events }: { run: UnifiedRun; steps: RunStep[]; events: RunEvent[] }) {
-  const STEP_COLORS: Record<string, string> = {
-    retrieve_chunks: 'bg-blue-500',
-    llm_call: 'bg-purple-500',
-    tool_call: 'bg-amber-500',
-    score_answer: 'bg-green-500',
-    agent_handoff: 'bg-orange-500',
-    embed_query: 'bg-teal-500',
-  }
-  const CAT_COLORS: Record<string, string> = {
-    execution: 'bg-blue-50 text-blue-700 border-blue-200',
-    data: 'bg-teal-50 text-teal-700 border-teal-200',
-    ai: 'bg-purple-50 text-purple-700 border-purple-200',
-    connection: 'bg-orange-50 text-orange-700 border-orange-200',
-    evaluation: 'bg-green-50 text-green-700 border-green-200',
-    governance: 'bg-rose-50 text-rose-700 border-rose-200',
-  }
-  const SEV_COLORS: Record<string, string> = {
-    info: 'text-slate-500',
-    warning: 'text-amber-600',
-    error: 'text-red-600',
+  const [openEvents, setOpenEvents] = useState<Set<string>>(new Set())
+
+  function toggle(id: string) {
+    setOpenEvents(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
 
+  function hasDetail(ev: RunEvent) {
+    const p = ev.payload
+    return !!(p && (p.input || p.output || p.error || p.metrics))
+  }
+
+  const maxMs = Math.max(...steps.map(s => s.duration_ms ?? 0), 1)
+
+  const stats: [string, string][] = [
+    ['Latency', run.summary?.total_latency_ms != null ? `${(run.summary.total_latency_ms / 1000).toFixed(2)}s` : '—'],
+    ['Tokens', run.summary?.total_tokens != null ? run.summary.total_tokens.toLocaleString() : '—'],
+    ['Cost', run.summary?.total_cost_usd != null ? `$${run.summary.total_cost_usd.toFixed(5)}` : '—'],
+    ['Steps', String(run.summary?.step_count ?? '—')],
+  ]
+
+  const output = run.summary?.final_output?.replace(/^```\w*\n?/, '').replace(/```$/, '').trim()
+
   return (
-    <div className="space-y-5">
-      {/* Summary */}
+    <div className="space-y-5 text-xs">
+
+      {/* ── Summary ── */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Run Summary</p>
         {run.summary?.name && (
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">{run.summary.name}</p>
+          <p className="text-sm font-semibold text-slate-100 mb-3">{run.summary.name}</p>
         )}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(
-            [
-              ['Latency', run.summary?.total_latency_ms != null ? `${run.summary.total_latency_ms.toFixed(0)}ms` : '—'],
-              ['Tokens', run.summary?.total_tokens != null ? run.summary.total_tokens.toLocaleString() : '—'],
-              ['Cost', run.summary?.total_cost_usd != null ? `$${run.summary.total_cost_usd.toFixed(5)}` : '—'],
-              ['Errors', run.summary?.error_count ?? '—'],
-            ] as [string, string | number][]
-          ).map(([label, value]) => (
-            <div key={label} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-              <p className="text-xs text-slate-400 mb-0.5">{label}</p>
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 font-mono">{value}</p>
+        <div className="flex gap-6 flex-wrap mb-3">
+          {stats.map(([label, value]) => (
+            <div key={label}>
+              <p className="text-slate-500 mb-0.5">{label}</p>
+              <p className="font-mono font-semibold text-slate-200">{value}</p>
             </div>
           ))}
         </div>
-        {run.summary?.final_output && (
-          <div className="mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-            <p className="text-xs text-slate-400 mb-1">Output preview</p>
-            <p className="text-xs text-slate-600 line-clamp-2">{run.summary.final_output}</p>
+        {output && (
+          <div className="bg-slate-800 border border-slate-700 rounded p-3">
+            <p className="text-slate-500 mb-1">Output preview</p>
+            <p className="text-slate-300 line-clamp-3 leading-relaxed">{output}</p>
           </div>
         )}
       </div>
 
-      {/* Steps timeline */}
+      {/* ── Steps ── */}
       {steps.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Steps Timeline</p>
-          <div className="space-y-1.5">
-            {steps.map(step => (
-              <div key={step.id} className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2">
-                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${STEP_COLORS[step.step_type] || 'bg-slate-400'}`} />
-                <span className="text-xs font-mono text-slate-700 dark:text-slate-200 w-32 flex-shrink-0">{step.step_type.replace('_', ' ')}</span>
-                {step.component && <span className="text-xs text-slate-400 font-mono">{step.component}</span>}
-                <div className="flex-1 mx-2">
-                  {step.duration_ms != null && (
-                    <div className="w-full bg-slate-100 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full ${STEP_COLORS[step.step_type] || 'bg-slate-400'} opacity-60`}
-                        style={{ width: `${Math.min(100, (step.duration_ms / 5000) * 100)}%`, minWidth: '4px' }}
-                      />
-                    </div>
-                  )}
+          <p className="uppercase tracking-widest text-slate-500 font-semibold mb-2">Steps Timeline</p>
+          <div className="space-y-1">
+            {steps.map(step => {
+              const pct = step.duration_ms != null ? Math.max(2, (step.duration_ms / maxMs) * 100) : 0
+              const color = STEP_COLORS[step.step_type] ?? '#64748b'
+              const isOk = step.status === 'completed'
+              const isFail = step.status === 'failed'
+              return (
+                <div
+                  key={step.id}
+                  style={{ display: 'grid', gridTemplateColumns: '8px 120px 160px 1fr 60px 72px', gap: '10px', alignItems: 'center' }}
+                  className="bg-slate-800/70 border border-slate-700/60 rounded px-3 py-2"
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                  <span className="font-mono text-slate-200 truncate">{step.step_type.replace(/_/g, ' ')}</span>
+                  <span className="font-mono text-slate-500 truncate">{step.component ?? '—'}</span>
+                  <div style={{ background: '#1e293b', borderRadius: 999, height: 4, overflow: 'hidden' }}>
+                    <div style={{ width: `${pct}%`, height: '100%', background: color, opacity: 0.75, borderRadius: 999 }} />
+                  </div>
+                  <span className="font-mono text-slate-400 text-right">{step.duration_ms != null ? `${step.duration_ms.toFixed(0)}ms` : '—'}</span>
+                  <span className={`text-right font-medium ${isOk ? 'text-emerald-400' : isFail ? 'text-red-400' : 'text-slate-500'}`}>{step.status}</span>
                 </div>
-                <span className="text-xs font-mono text-slate-500 w-16 text-right">
-                  {step.duration_ms != null ? `${step.duration_ms.toFixed(0)}ms` : '—'}
-                </span>
-                <span className={`text-xs px-1.5 py-0.5 rounded ${step.status === 'completed' ? 'text-emerald-600' : step.status === 'failed' ? 'text-red-500' : 'text-slate-400'}`}>
-                  {step.status}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
 
-      {/* Events log */}
+      {/* ── Events ── */}
       {events.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Events</p>
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-            <table className="w-full text-xs">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
-                  <th className="px-3 py-2 text-left font-medium text-slate-500">Time</th>
-                  <th className="px-3 py-2 text-left font-medium text-slate-500">Category</th>
-                  <th className="px-3 py-2 text-left font-medium text-slate-500">Event</th>
-                  <th className="px-3 py-2 text-left font-medium text-slate-500">Summary</th>
-                  <th className="px-3 py-2 text-left font-medium text-slate-500">Sev</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map(ev => (
-                  <tr key={ev.id} className="border-b border-slate-50 last:border-0">
-                    <td className="px-3 py-1.5 font-mono text-slate-400 whitespace-nowrap">
-                      {new Date(ev.timestamp).toLocaleTimeString('en-GB')}
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <span className={`inline-flex text-xs border rounded-full px-1.5 py-0.5 ${CAT_COLORS[ev.category] || 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                        {ev.category}
-                      </span>
-                    </td>
-                    <td className="px-3 py-1.5 font-mono text-slate-600">{ev.event_type}</td>
-                    <td className="px-3 py-1.5 text-slate-500 max-w-xs truncate">{ev.summary || '—'}</td>
-                    <td className={`px-3 py-1.5 font-medium ${SEV_COLORS[ev.severity] || 'text-slate-400'}`}>{ev.severity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <p className="uppercase tracking-widest text-slate-500 font-semibold mb-2">Events</p>
+          <div className="border border-slate-700 rounded overflow-hidden divide-y divide-slate-700/50">
+            {events.map(ev => {
+              const open = openEvents.has(ev.id)
+              const expandable = hasDetail(ev)
+              const catCls = CAT_CLASSES[ev.category] ?? 'bg-slate-700/40 text-slate-400 border-slate-600'
+              const sevCls = ev.severity === 'error' ? 'text-red-400' : ev.severity === 'warning' ? 'text-amber-400' : 'text-slate-500'
+              const p = ev.payload ?? {}
+              return (
+                <div key={ev.id} className="bg-slate-800/50">
+                  <div
+                    style={{ display: 'grid', gridTemplateColumns: '56px 80px 112px 1fr 36px 16px', gap: '10px', alignItems: 'center' }}
+                    className={`px-3 py-2 ${expandable ? 'cursor-pointer hover:bg-slate-700/30' : ''}`}
+                    onClick={() => expandable && toggle(ev.id)}
+                  >
+                    <span className="font-mono text-slate-500">{parseUTC(ev.timestamp).toLocaleTimeString('en-GB')}</span>
+                    <span className={`inline-flex items-center justify-center border rounded-full px-2 py-0.5 text-center ${catCls}`}>{ev.category}</span>
+                    <span className="font-mono text-slate-300 truncate">{ev.event_type.replace(/_/g, ' ')}</span>
+                    <span className="text-slate-400 truncate">{ev.summary || '—'}</span>
+                    <span className={`text-right font-medium ${sevCls}`}>{ev.severity}</span>
+                    <span className="text-slate-500 flex justify-end">
+                      {expandable && (open ? <ChevronDown size={12} /> : <ChevronRight size={12} />)}
+                    </span>
+                  </div>
+                  {open && expandable && (
+                    <div className="px-3 pb-3 pt-1 bg-slate-900/40 space-y-2">
+                      {(['input', 'output', 'error'] as const).map(key =>
+                        p[key] ? (
+                          <div key={key}>
+                            <p className="text-slate-500 font-semibold capitalize mb-0.5">{key}</p>
+                            <p className="text-slate-300 whitespace-pre-wrap break-words leading-relaxed">{String(p[key])}</p>
+                          </div>
+                        ) : null
+                      )}
+                      {!!(p.metrics) && typeof p.metrics === 'object' && (
+                        <div>
+                          <p className="text-slate-500 font-semibold mb-1">Metrics</p>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1">
+                            {Object.entries(p.metrics as Record<string, unknown>)
+                              .filter(([k]) => k !== 'tool_name')
+                              .map(([k, v]) => (
+                                <span key={k} className="text-slate-400">
+                                  {k.replace(/_/g, ' ')}: <span className="font-mono text-slate-200">{String(v as string | number | boolean)}</span>
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -353,16 +390,16 @@ export function Runs() {
           <div className="flex items-center justify-center h-32 text-slate-400 text-sm">No runs recorded yet.</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500">Domain</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500">Type</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500">Status</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500">Started</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500">Duration</th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500">Tokens</th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500">Cost</th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500">Steps</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-400">Domain</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-400">Type</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-400">Status</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-400">Started</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-400">Duration</th>
+                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 dark:text-slate-400">Tokens</th>
+                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 dark:text-slate-400">Cost</th>
+                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 dark:text-slate-400">Steps</th>
                 <th className="w-8"></th>
               </tr>
             </thead>
@@ -405,19 +442,19 @@ function RunRows({
   return (
     <>
       <tr
-        className={`border-b border-slate-100 cursor-pointer transition-colors ${expanded ? 'bg-slate-50' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+        className={`border-b border-slate-100 dark:border-slate-700 cursor-pointer transition-colors ${expanded ? 'bg-slate-50 dark:bg-slate-700/30' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
         onClick={onToggle}
       >
         <td className="px-4 py-2.5"><DomainBadge domain={run.primary_domain} /></td>
-        <td className="px-4 py-2.5 text-xs text-slate-600 font-mono">
+        <td className="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-300 font-mono">
           <span>{run.run_type.replace('_', ' ')}</span>
           {run.summary?.name && (
-            <span className="ml-1.5 text-slate-400">· {run.summary.name}</span>
+            <span className="ml-1.5 text-slate-400 dark:text-slate-500">· {run.summary.name}</span>
           )}
         </td>
         <td className="px-4 py-2.5"><StatusBadge status={run.status} /></td>
         <td className="px-4 py-2.5 text-xs text-slate-500 whitespace-nowrap">
-          {new Date(run.started_at).toLocaleString('en-GB', {
+          {parseUTC(run.started_at).toLocaleString('en-GB', {
             day: '2-digit',
             month: 'short',
             hour: '2-digit',
@@ -425,15 +462,15 @@ function RunRows({
             second: '2-digit',
           })}
         </td>
-        <td className="px-4 py-2.5 text-xs text-slate-600 font-mono">{formatDuration(run.started_at, run.ended_at)}</td>
-        <td className="px-4 py-2.5 text-right text-xs font-mono text-slate-600">
+        <td className="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-300 font-mono">{formatDuration(run.started_at, run.ended_at)}</td>
+        <td className="px-4 py-2.5 text-right text-xs font-mono text-slate-600 dark:text-slate-300">
           {run.summary?.total_tokens
             ? run.summary.total_tokens >= 1000
               ? `${(run.summary.total_tokens / 1000).toFixed(1)}K`
               : run.summary.total_tokens
             : '—'}
         </td>
-        <td className="px-4 py-2.5 text-right text-xs font-mono text-slate-600">
+        <td className="px-4 py-2.5 text-right text-xs font-mono text-slate-600 dark:text-slate-300">
           {run.summary?.total_cost_usd != null ? `$${run.summary.total_cost_usd.toFixed(4)}` : '—'}
         </td>
         <td className="px-4 py-2.5 text-right text-xs text-slate-500">{run.summary?.step_count ?? '—'}</td>
@@ -442,7 +479,7 @@ function RunRows({
         </td>
       </tr>
       {expanded && (
-        <tr className="bg-slate-50 border-b border-slate-200">
+        <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
           <td colSpan={9} className="px-6 py-4">
             {detailLoading ? (
               <div className="flex items-center gap-2 text-slate-400 text-sm">

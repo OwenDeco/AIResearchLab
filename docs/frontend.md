@@ -1,4 +1,4 @@
-# Frontend
+# Frontend (AI Systems Lab v2.0)
 
 The frontend is built with React + Vite + TypeScript, using Tailwind CSS for styling.
 
@@ -193,7 +193,7 @@ Third panel for managing external A2A agents and MCP servers:
 
 ### 9. Agent (`/agent`)
 
-Full-page chat interface with the RAG Lab Agent, with persistent named sessions.
+Full-page chat interface with the AI Systems Lab Agent, with persistent named sessions.
 
 **Layout:** Sessions sidebar (left) + chat area (right).
 
@@ -251,7 +251,7 @@ Cross-domain run browser — every execution across the platform in one view.
 A floating chat button (bottom-right corner, Bot icon) is available on every page. It opens a 560px-tall chat panel.
 
 **Features:**
-- Gradient header with title "RAG Lab Agent"
+- Gradient header with title "AI Systems Lab Agent"
 - Multi-turn conversation with history
 - Shows latency per assistant response
 - Sources list per response (scrollable, all sources shown)
@@ -261,12 +261,114 @@ A floating chat button (bottom-right corner, Bot icon) is available on every pag
 
 ---
 
+### 12. Agents (`/agents`)
+
+Create, configure, and chat with named agent configs.
+
+**Features:**
+- Sidebar list of all configured agents with create (+) and delete buttons
+- **Configure tab:** edit name, role, system prompt, RAG settings (mode, model, embed model, top-K), tool connections (MCP server IDs, A2A connection IDs, sub-agent IDs), and A2A exposure toggle
+- **Chat tab:** multi-turn conversation with the selected agent; shows latency per reply, RAG-used badge, source chunks when RAG is active
+- Agents are persisted in AppState (`agent_configs` key) and used by the Debate Room and Agent Flow
+
+---
+
+### 13. Agent Flow (`/flow`)
+
+Force-directed graph visualising every agent, MCP server, and A2A connection in the system.
+
+**Features:**
+- All nodes rendered even if unconnected — full topology always visible
+- Card-style rounded-rectangle nodes: colored left accent bar (agent=indigo, MCP=amber, A2A=purple), letter badge, label
+- Edge types: agent→agent (green), agent→MCP (amber), agent→A2A (purple); color-coded legend top-left
+- Click a node → right-hand side panel with full config details
+- **Layout persistence:** node positions are saved to `localStorage` on drag-end (`fx`/`fy` pins the node after release). Positions survive page navigation and reload. Unsaved nodes start in an evenly-spaced circle (`radius = 180 + nodeCount * 12`) so they never pile up at the origin.
+- **Reset layout** button (top-right): clears saved positions and re-runs D3 force simulation from the circle starting layout
+- D3 link distance: 60 units; canvas resizes correctly on initial load via `ResizeObserver`
+- Sub-agent links: configured via the `agent_ids` field on the Agents page
+
+---
+
+### 14. Pixel Orchestration Simulator (`/orchestration-simulator`)
+
+Pixel-art room that replays or live-streams an agent run, showing each agent walking between workstations as events happen.
+
+**Workstations:**
+| Workstation | Position | Used for |
+|---|---|---|
+| RAG Index | top-left | `rag_retrieval` events |
+| Task Queue | top-center | sub-agent start (`started` event) — picks up the task |
+| LLM Server | top-right | `llm_call` events |
+| Orchestrator Hub | center | orchestrator agent home; sub-agents deliver results here on `completed` |
+| Tool Console | bottom-left | `mcp_tool_call` events |
+| Standby | bottom-right | initial position for sub-agents before they're dispatched |
+
+**Agent sprites:** Each agent (orchestrator + up to N sub-agents) is a pixel-art sprite with a distinct color; sprites lerp smoothly between positions (factor 0.22, 80ms tick).
+
+**Run selection:** Dropdown at the top lists all top-level `agent_chat` runs (sub-agent child runs are excluded). Shows status badge (live / done / failed) next to the selected run.
+
+**Replay button:** Resets animation state and re-replays the full event sequence from t=0 without re-selecting the run.
+
+**Event → movement mapping:**
+| Event type | Agent affected | Movement |
+|---|---|---|
+| `started` | sub-agent | → Task Queue |
+| `llm_call` | that agent | → LLM Server (duration shown) |
+| `rag_retrieval` | that agent | → RAG Index (duration shown) |
+| `mcp_tool_call` | that agent | → Tool Console (duration shown) |
+| `a2a_tool_call` | that agent | → Orchestrator Hub |
+| `completed` (sub) | sub-agent | → Orchestrator Hub (delivering result) |
+| `completed` (orch) | all | → idle positions |
+| `dispatching` | orchestrator | status label only — no movement |
+
+**Timing engine:**
+- Events fire at their real timestamps (scaled so runs > 45s are compressed to a 45s replay window)
+- Each agent's timeline runs independently (async per `run_id`) so orchestrator and sub-agents advance in parallel
+- Duration labels (`"4.2s"`) appear in the activity log and current-task field; sourced from `payload.duration_ms` on each RunEvent (written by `_add_step` in the backend)
+- No artificial dwell cap — a 20s LLM call keeps the sprite at the LLM Server for 20s
+
+**Activity log:** Right-hand panel shows the selected agent's event history with timestamps and durations; agent picker buttons switch between sprites.
+
+**Data source:** `GET /api/unified-runs/{id}/live?since=<iso>` polled every 150ms while the run is live; stops polling when `status !== 'running'`. Sub-agent child runs appear in `children` and are merged into the sprite list as they are created.
+
+The Pixel Simulator page has a **mode bar** at the top with two tabs: **Agent Simulation** (the run-replay view above) and **Debate Room** (see below).
+
+---
+
+### 15. Debate Room (mode within `/orchestration-simulator`)
+
+Structured multi-agent debate on a pixel-art stage. A host agent opens the debate, guest agents speak in turns, the host moderates between rounds, and the host closes with a summary.
+
+**Setup:**
+- Pick a host agent (identified by "host" in name or role) and one or more guest agents from the configured agent list
+- Enter a debate topic and choose the number of rounds (1–5)
+- Click **Start Debate**
+
+**Display:**
+- Three character slots: host at top-center, guest 1 at bottom-left, guest 2 at bottom-right
+- Each speaking turn appears as a speech balloon above the character
+- Text streams into the balloon character-by-character (`TICK_MS = 150 ms`, `CHARS_PER_TICK = 4`)
+- The next turn only appears after the current balloon finishes typing and a 900 ms inter-turn pause
+- While waiting for the next turn a "thinking dots" bubble appears above the next expected speaker
+- Debate topic label is shown below the host character with a hover tooltip showing the full text
+- Turn type badge on each balloon: `open` / `speak` / `moderate` / `close`
+
+**Controls:**
+- **Replay** button: resets `displayedCount` to 0 so the typewriter effect replays from the beginning (no new LLM calls)
+- **Skip to end**: jumps all turns to fully visible immediately
+
+**Backend:** `POST /api/debate/start` launches a background task that runs all LLM calls sequentially and stores turns in AppState. The frontend polls `GET /api/debate/{id}` every 1500 ms while `status === 'running'`, revealing turns one at a time regardless of how many have already been generated.
+
+**Session history:** Previous debates are listed in a sidebar; click any to replay it.
+
+---
+
 ## Sidebar Navigation
 
 The sidebar is organised into 7 domain groups:
 - **Overview** — Dashboard
 - **Context Engineering** — Ingest, Graph Explorer
-- **Orchestration & Runtime** — Runtime Playground, Agent
+- **Orchestration & Runtime** — Runtime Playground, Agent, Agents, Agent Flow, Pixel Orchestration Simulator (incl. Debate Room)
 - **Interoperability** — Connections
 - **Evaluation & Benchmarking** — Benchmark Lab
 - **Governance & Observability** — Analytics, Runs, Logs

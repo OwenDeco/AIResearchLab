@@ -132,6 +132,25 @@ class OpenAIProvider:
             model=self._model,
         )
 
+    def complete_stream(
+        self,
+        messages: List[dict],
+        temperature: float = 0.75,
+        max_tokens: int = 150,
+    ):
+        """Synchronous generator that yields text chunks as the model streams them."""
+        stream = self._client.chat.completions.create(
+            model=self._model,
+            messages=messages,
+            temperature=temperature,
+            max_completion_tokens=max_tokens,
+            stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+
     def complete_with_tools(
         self,
         messages: List[dict],
@@ -168,6 +187,7 @@ class OpenAIProvider:
             max_completion_tokens=max_tokens,
             tools=tools,
             tool_choice="auto",
+            parallel_tool_calls=True,
         )
         choice = response.choices[0]
         usage = response.usage
@@ -262,6 +282,25 @@ class AzureOpenAIProvider:
             model=self._deployment,
         )
 
+    def complete_stream(
+        self,
+        messages: List[dict],
+        temperature: float = 0.75,
+        max_tokens: int = 150,
+    ):
+        """Synchronous generator that yields text chunks as the model streams them."""
+        stream = self._client.chat.completions.create(
+            model=self._deployment,
+            messages=messages,
+            temperature=temperature,
+            max_completion_tokens=max_tokens,
+            stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+
     def complete_with_tools(
         self,
         messages: List[dict],
@@ -298,6 +337,7 @@ class AzureOpenAIProvider:
             max_completion_tokens=max_tokens,
             tools=tools,
             tool_choice="auto",
+            parallel_tool_calls=True,
         )
         choice = response.choices[0]
         usage = response.usage

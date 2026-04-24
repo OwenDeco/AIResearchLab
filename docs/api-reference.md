@@ -405,8 +405,9 @@ List unified runs across all domains.
 | Param | Type | Default | Description |
 |---|---|---|---|
 | domain | string | — | Filter by: orchestration, evaluation, interoperability, context_engineering, governance |
-| run_type | string | — | Filter by: runtime_test, retrieval_test, benchmark_run, connection_test, agent_session |
+| run_type | string | — | Filter by: runtime_test, retrieval_test, benchmark_run, connection_test, agent_session, agent_chat |
 | status | string | — | Filter by: running, completed, failed |
+| top_level_only | bool | true | When true, hides child runs (rows with `parent_run_id` set) — sub-agent runs are accessed via `/live` instead |
 | limit | int | 50 | Max results |
 | offset | int | 0 | Pagination offset |
 
@@ -493,7 +494,35 @@ Each `RunEventOut`:
 
 Event categories: `execution` | `data` | `ai` | `connection` | `evaluation` | `governance`
 
-Event types (examples): `started`, `completed`, `failed`, `chunk_selected`, `llm_called`, `a2a_sent`, `a2a_received`, `mcp_called`, `score_computed`
+Event types (examples): `started`, `completed`, `failed`, `dispatching`, `llm_call`, `rag_retrieval`, `mcp_tool_call`, `a2a_tool_call`, `chunk_selected`, `llm_called`, `a2a_sent`, `a2a_received`, `mcp_called`, `score_computed`
+
+**`payload.duration_ms`:** All RunEvents written by `_add_step` (i.e. `llm_call`, `rag_retrieval`, `mcp_tool_call`, `a2a_tool_call`) include `duration_ms` in their payload — the exact measured step duration in milliseconds. Used by the Simulator to dwell agents at workstations for the correct amount of time.
+
+---
+
+### GET /api/unified-runs/{run_id}/live
+Polling endpoint for the Pixel Orchestration Simulator.
+
+**Query params:**
+| Param | Type | Default | Description |
+|---|---|---|---|
+| since | string (ISO datetime) | — | If provided, only returns events with `timestamp > since` (incremental polling) |
+
+**Response:**
+```json
+{
+  "run": { ...UnifiedRunOut },
+  "children": [ ...UnifiedRunOut ],
+  "events": [ ...RunEventOut ],
+  "now": "2026-04-22T15:22:33.123456"
+}
+```
+
+- `children`: all `UnifiedRun` rows with `parent_run_id = run_id` (sub-agent runs)
+- `events`: all events for the root run and all children, filtered by `since`
+- `now`: server UTC time; use as the next `since` value when polling
+
+Poll every 150ms. Stop when `run.status !== 'running'`.
 
 ---
 
@@ -701,7 +730,7 @@ Call a specific tool on a registered MCP server.
 
 ## MCP Server
 
-The RAG Lab exposes an MCP (Model Context Protocol) server at `/mcp` using the SSE transport.
+The AI Systems Lab exposes an MCP (Model Context Protocol) server at `/mcp` using the SSE transport.
 
 ### GET /mcp/sse
 SSE stream endpoint. MCP clients connect here to establish a session.
@@ -713,7 +742,7 @@ Client-to-server messages endpoint. Used by the MCP client after connecting via 
 
 | Parameter | Type | Description |
 |---|---|---|
-| `query` | string | Any question about the RAG Lab application |
+| `query` | string | Any question about the AI Systems Lab application |
 
 Returns a detailed text answer grounded in the project documentation. Every call is logged to the connection log (direction: inbound, type: mcp).
 
@@ -721,7 +750,7 @@ Returns a detailed text answer grounded in the project documentation. Every call
 ```json
 {
   "mcpServers": {
-    "rag-lab": {
+    "ai-systems-lab": {
       "transport": {"type": "sse", "url": "http://localhost:8002/mcp/sse"}
     }
   }
@@ -735,7 +764,7 @@ When exposed via ngrok, replace `http://localhost:8002` with the tunnel URL.
 ## Agent
 
 ### POST /api/agent/chat
-Send a message to the RAG Lab Agent.
+Send a message to the AI Systems Lab Agent.
 
 **Request body:**
 ```json
@@ -836,6 +865,106 @@ Get custom model definitions (LLMs and embedding models added by the user).
 Save custom model definitions.
 
 **Request body:** `{"llms": ["..."], "embed_models": ["..."]}`
+
+---
+
+## Agent Configs
+
+CRUD and chat endpoints for user-defined agent configurations. Configs are persisted in AppState under key `agent_configs`.
+
+### GET /api/agent-configs
+List all agent configs.
+
+**Response:** array of `{id, name, role, system_prompt, tools, rag, created_at, updated_at}`
+
+### POST /api/agent-configs
+Create a new agent config.
+
+**Request body:**
+```json
+{
+  "name": "My Agent",
+  "role": "assistant",
+  "system_prompt": "You are ...",
+  "tools": {"mcp_connection_ids": [], "a2a_connection_ids": [], "agent_ids": [], "use_own_a2a": false},
+  "rag": {"enabled": false, "retrieval_mode": "hybrid", "model_name": "", "embed_model": "", "top_k": 5}
+}
+```
+
+### GET /api/agent-configs/{id}
+Get a single agent config by ID.
+
+### PUT /api/agent-configs/{id}
+Update an agent config (full replace, same body as POST).
+
+### DELETE /api/agent-configs/{id}
+Delete an agent config. Returns `204`.
+
+### POST /api/agent-configs/{id}/chat
+Chat with a named agent config.
+
+**Request body:** `{"message": "...", "history": [{"role": "user"|"assistant", "content": "..."}]}`
+
+**Response:** `{"answer": "...", "latency_ms": 234, "run_id": "...", "rag_used": false, "sources": []}`
+
+### POST /api/agent-configs/{id}/a2a
+A2A-compatible endpoint for the agent. Accepts a JSON-RPC-style message with `message.parts[].text` and returns `{id, result: {parts: [{text}]}, metadata: {latency_ms, run_id}}`.
+
+---
+
+## Debate
+
+Structured multi-agent debate orchestration. Stored in AppState under key `debate_sessions` (up to 50 sessions).
+
+### POST /api/debate/start
+Start a new debate session. Launches a FastAPI background task that runs all LLM turns sequentially.
+
+**Request body:**
+```json
+{
+  "host_id": "<agent-config-id>",
+  "guest_ids": ["<agent-config-id>", "..."],
+  "topic": "Should AI be regulated?",
+  "rounds": 2
+}
+```
+
+**Response:** `{"session_id": "<uuid>"}`
+
+The background task generates: one opening turn (host) → per-round guest responses → host moderation between rounds → one closing turn (host). Each turn is appended to the session as it completes. Max output tokens per turn: 90.
+
+### GET /api/debate
+List all debate sessions, most recent first.
+
+**Response:** array of session objects (see below).
+
+### GET /api/debate/{session_id}
+Get a single debate session.
+
+**Response:**
+```json
+{
+  "id": "...",
+  "status": "running|completed|failed",
+  "host_id": "...",
+  "guest_ids": ["..."],
+  "topic": "...",
+  "rounds": 2,
+  "turns": [
+    {
+      "id": "...",
+      "agent_id": "...",
+      "agent_name": "Debate Host",
+      "role": "moderator",
+      "content": "...",
+      "turn_type": "open|speak|moderate|close",
+      "timestamp": "..."
+    }
+  ],
+  "started_at": "...",
+  "ended_at": "..."
+}
+```
 
 ---
 

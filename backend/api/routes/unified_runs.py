@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -118,6 +119,7 @@ def list_unified_runs(
     domain: Optional[str] = None,
     run_type: Optional[str] = None,
     status: Optional[str] = None,
+    top_level_only: bool = True,
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
@@ -129,6 +131,8 @@ def list_unified_runs(
         q = q.filter(UnifiedRun.run_type == run_type)
     if status is not None:
         q = q.filter(UnifiedRun.status == status)
+    if top_level_only:
+        q = q.filter(UnifiedRun.parent_run_id == None)  # noqa: E711
     total = q.count()
     runs = q.order_by(UnifiedRun.started_at.desc()).offset(offset).limit(limit).all()
     return {"runs": [_run_to_out(r) for r in runs], "total": total}
@@ -162,3 +166,47 @@ def get_run_events(run_id: str, db: Session = Depends(get_db)) -> dict:
         .all()
     )
     return {"events": [_event_to_out(e) for e in events]}
+
+
+@router.get("/{run_id}/live")
+def get_run_live(
+    run_id: str,
+    since: Optional[str] = None,
+    db: Session = Depends(get_db),
+) -> dict:
+    """
+    Polling endpoint for the live simulator.
+    Returns the orchestrator run, all child runs, and all new events since `since`.
+    Poll every 150ms with ?since=<last_now> to get only new events each tick.
+    """
+    root = db.query(UnifiedRun).filter(UnifiedRun.id == run_id).first()
+    if root is None:
+        raise HTTPException(status_code=404, detail="Run not found.")
+
+    children = (
+        db.query(UnifiedRun)
+        .filter(UnifiedRun.parent_run_id == run_id)
+        .order_by(UnifiedRun.started_at)
+        .all()
+    )
+
+    all_run_ids = [run_id] + [c.id for c in children]
+
+    since_dt: Optional[datetime] = None
+    if since:
+        try:
+            since_dt = datetime.fromisoformat(since)
+        except ValueError:
+            pass
+
+    q = db.query(RunEvent).filter(RunEvent.run_id.in_(all_run_ids))
+    if since_dt:
+        q = q.filter(RunEvent.timestamp > since_dt)
+    events = q.order_by(RunEvent.timestamp).all()
+
+    return {
+        "run": _run_to_out(root),
+        "children": [_run_to_out(c) for c in children],
+        "events": [_event_to_out(e) for e in events],
+        "now": datetime.utcnow().isoformat(),
+    }
