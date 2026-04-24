@@ -13,8 +13,8 @@ import { api } from '../api/client'
 import { useAppStore } from '../store/useAppStore'
 import { Spinner } from '../components/Spinner'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { SimReplayWidget } from '../features/orchestration-sim/SimReplayWidget'
 import type { Run } from '../types'
-import { parseUTC } from '../utils/date'
 
 function StatCard({ label, value, helper }: { label: string; value: string | number; helper?: string }) {
   return (
@@ -111,7 +111,6 @@ export function Dashboard() {
   const avgChunksPerDoc = documents.length
     ? Math.round(documents.reduce((acc, doc) => acc + (doc.chunk_count ?? 0), 0) / documents.length)
     : 0
-  const recentRuns = [...runs].slice(0, 10)
   const newestRunDate = runs[0]?.created_at
 
   const checklist = [
@@ -224,47 +223,8 @@ export function Dashboard() {
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Recent Runs</h2>
-        {runs.length === 0 ? (
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
-            No runs yet. Head to the{' '}
-            <Link to="/playground" className="text-blue-600 hover:underline">
-              Playground
-            </Link>{' '}
-            to get started.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Query</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Mode</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Model</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Latency</th>
-                  <th className="text-left py-2 pr-4 text-slate-600 dark:text-slate-300 font-medium">Cost</th>
-                  <th className="text-left py-2 text-slate-600 dark:text-slate-300 font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentRuns.map((run) => (
-                  <tr key={run.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
-                    <td className="py-2 pr-4 text-slate-800 dark:text-slate-100 max-w-xs truncate">
-                      {run.query.length > 60 ? run.query.slice(0, 60) + '…' : run.query}
-                    </td>
-                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{run.retrieval_mode}</td>
-                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300 max-w-xs truncate">{run.model_name}</td>
-                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">{run.latency_ms?.toFixed(0)}ms</td>
-                    <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">${run.estimated_cost_usd?.toFixed(4)}</td>
-                    <td className="py-2 text-slate-500 dark:text-slate-400">
-                      {parseUTC(run.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">Latest Agent Run</h2>
+        <SimReplayWidget />
       </div>
     </div>
   )
