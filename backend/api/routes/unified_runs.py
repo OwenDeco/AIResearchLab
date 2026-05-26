@@ -119,6 +119,7 @@ def list_unified_runs(
     domain: Optional[str] = None,
     run_type: Optional[str] = None,
     status: Optional[str] = None,
+    initiated_by: Optional[str] = None,
     top_level_only: bool = True,
     limit: int = 50,
     offset: int = 0,
@@ -131,6 +132,8 @@ def list_unified_runs(
         q = q.filter(UnifiedRun.run_type == run_type)
     if status is not None:
         q = q.filter(UnifiedRun.status == status)
+    if initiated_by is not None:
+        q = q.filter(UnifiedRun.initiated_by == initiated_by)
     if top_level_only:
         q = q.filter(UnifiedRun.parent_run_id == None)  # noqa: E711
     total = q.count()

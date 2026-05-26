@@ -285,6 +285,11 @@ export const api = {
     return res.data
   },
 
+  async getOSDebateAgentCard(): Promise<any> {
+    const res = await http.get('/connections/os-debate-agent-card')
+    return res.data
+  },
+
   async getRegisteredConnections(): Promise<{ a2a: any[]; mcp: any[] }> {
     const res = await http.get('/connections/registered')
     return res.data
@@ -546,9 +551,40 @@ export const api = {
     return res.data
   },
 
+  // ---- OS Debate ----
+  async startOSDebate(body: {
+    host_id: string
+    guest_ids: string[]
+    topic: string
+    rounds: number
+  }): Promise<{ session_id: string }> {
+    const res = await http.post('/os-debate/start', body)
+    return res.data
+  },
+
+  async listOSDebateSessions(): Promise<any[]> {
+    const res = await http.get('/os-debate')
+    return res.data
+  },
+
+  async getOSDebateSession(sessionId: string): Promise<any> {
+    const res = await http.get(`/os-debate/${sessionId}`)
+    return res.data
+  },
+
+  async startOSDebateExternal(body: { rounds: number; Question: string }): Promise<{ session_id: string; os_triggered: boolean }> {
+    const res = await http.post('/os-debate/start-external', body)
+    return res.data
+  },
+
+  async stopOSDebateSession(sessionId: string): Promise<{ ok: boolean }> {
+    const res = await http.post(`/os-debate/${sessionId}/stop`)
+    return res.data
+  },
+
   // ---- Unified Runs ----
 
-  getUnifiedRuns(params?: { domain?: string; run_type?: string; status?: string; limit?: number; offset?: number }) {
+  getUnifiedRuns(params?: { domain?: string; run_type?: string; status?: string; initiated_by?: string; limit?: number; offset?: number }) {
     return http.get('/unified-runs', { params }).then(r => r.data)
   },
 

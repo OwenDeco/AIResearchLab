@@ -98,6 +98,8 @@ def get_connections(request: Request):
     a2a_status    = f_a2a.result()
     mcp_status    = a2a_status  # MCP lives on the same server as A2A
     ollama_status = f_ollama.result()
+    # OS Debate A2A is always active — it runs on the same local server
+    os_debate_a2a_status = "active"
 
     # ----------------------------------------------------------------
     # Exposed connections
@@ -139,6 +141,25 @@ def get_connections(request: Request):
                 {"label": "Messages", "url": f"{base}/mcp/messages"},
             ],
             "tools": ["ask_rag_lab"],
+        },
+        {
+            "id": "os_debate_a2a",
+            "name": "OS Critical Debate Agent",
+            "protocol": "A2A",
+            "status": os_debate_a2a_status,
+            "description": (
+                "A2A endpoint for the OS Critical Debate Agent. OutSystems sends a "
+                "tasks/send call with the debate session_id; the agent reads the current "
+                "session turns, generates a critical counterargument via the configured LLM, "
+                "saves the turn as 'critical' in the debate room, and returns an A2A task result. "
+                "Requires the ngrok tunnel for external (OutSystems) access."
+            ),
+            "endpoints": [
+                {"label": "Agent Card", "url": f"{base}/api/os-debate/a2a/agent.json"},
+                {"label": "Task Endpoint", "url": f"{base}/api/os-debate/a2a"},
+            ],
+            "methods": ["tasks/send"],
+            "skills": ["respond-to-debate"],
         },
     ]
 
@@ -212,3 +233,10 @@ def get_agent_card():
     """Return the A2A agent card as a structured object (same as /.well-known/agent.json)."""
     from api.routes.a2a import _agent_card
     return _agent_card()
+
+
+@router.get("/os-debate-agent-card")
+def get_os_debate_agent_card():
+    """Return the OS Debate A2A agent card."""
+    from api.routes.os_debate import _os_a2a_agent_card
+    return _os_a2a_agent_card()

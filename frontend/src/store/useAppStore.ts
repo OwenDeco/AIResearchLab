@@ -26,6 +26,10 @@ interface AppStore {
   // Dark mode
   darkMode: boolean
   toggleDarkMode: () => void
+
+  // Privacy / screen-share mode — masks sensitive values in the UI
+  privacyMode: boolean
+  togglePrivacyMode: () => void
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -34,6 +38,7 @@ export const useAppStore = create<AppStore>((set) => ({
   activeSessionId: null,
   extractProgress: {},
   darkMode: localStorage.getItem('darkMode') === 'true',
+  privacyMode: false,
 
   setModels: (m) => set({ models: m }),
 
@@ -57,4 +62,7 @@ export const useAppStore = create<AppStore>((set) => ({
       document.documentElement.classList.toggle('dark', next)
       return { darkMode: next }
     }),
-}))
+
+  togglePrivacyMode: () => set((state) => ({ privacyMode: !state.privacyMode })),
+})
+)

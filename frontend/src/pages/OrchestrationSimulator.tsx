@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, Clock3, MessageSquare, RefreshCw, RotateCcw, XCircle } from 'lucide-react'
 import { OrchestrationRoom } from '../features/orchestration-sim/OrchestrationRoom'
 import { DebateRoom } from '../features/orchestration-sim/DebateRoom'
+import { OSDebateRoom } from '../features/orchestration-sim/OSDebateRoom'
 import {
   WORKSTATIONS,
   MIN_DWELL_MS,
@@ -9,7 +10,7 @@ import {
   mergeWithNewChildren,
   applySingleEvent,
 } from '../features/orchestration-sim/simEngine'
-import type { AgentState, AgentStatus, SimRun, SimEvent } from '../features/orchestration-sim/simEngine'
+import type { AgentState, SimRun, SimEvent } from '../features/orchestration-sim/simEngine'
 import { api } from '../api/client'
 
 // ── Run selector ──────────────────────────────────────────────────────────────
@@ -60,7 +61,7 @@ function RunSelector({ runs, selectedId, onSelect, onRefresh }: {
 
 // ── Mode tab bar ──────────────────────────────────────────────────────────────
 
-type SimMode = 'simulation' | 'debate'
+type SimMode = 'simulation' | 'debate' | 'os-debate'
 
 function ModeBar({ mode, onChange }: { mode: SimMode; onChange: (m: SimMode) => void }) {
   const tab = (m: SimMode, label: string, icon: React.ReactNode) => (
@@ -80,6 +81,7 @@ function ModeBar({ mode, onChange }: { mode: SimMode; onChange: (m: SimMode) => 
     <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-700 mb-5">
       {tab('simulation', 'Agent Simulation', <Clock3 size={13} />)}
       {tab('debate', 'Debate Room', <MessageSquare size={13} />)}
+      {tab('os-debate', 'OS Debate Room', <MessageSquare size={13} />)}
     </div>
   )
 }
@@ -121,7 +123,7 @@ export function OrchestrationSimulator() {
     return Math.max(MIN_DWELL_MS, new Date(nextSame.timestamp).getTime() - new Date(ev.timestamp).getTime())
   }
 
-  async function runAgentTimeline(agentId: string, events: SimEvent[], runStartMs: number) {
+  async function runAgentTimeline(_agentId: string, events: SimEvent[], runStartMs: number) {
     for (const ev of events) {
       if (!mountedRef.current) return
       // Fire at the event's real (scaled) timestamp — no artificial walk delay
@@ -181,7 +183,7 @@ export function OrchestrationSimulator() {
   // ── Load run list ──────────────────────────────────────────────────────────
   async function loadRuns() {
     try {
-      const data = await api.getUnifiedRuns({ run_type: 'agent_chat', limit: 40 })
+      const data = await api.getUnifiedRuns({ run_type: 'agent_chat', initiated_by: 'user', limit: 40 })
       setRuns(data.runs ?? [])
     } catch {}
   }
@@ -282,6 +284,9 @@ export function OrchestrationSimulator() {
 
       {/* ── Debate Room ───────────────────────────────────────────────────── */}
       {mode === 'debate' && <DebateRoom />}
+
+      {/* ── OS Debate Room ────────────────────────────────────────────────── */}
+      {mode === 'os-debate' && <OSDebateRoom />}
 
       {/* ── Agent Simulation ─────────────────────────────────────────────── */}
       {mode === 'simulation' && (

@@ -171,10 +171,10 @@ function DebateStage({
           style={{ background: 'linear-gradient(to top, #312e8133, transparent)' }}
         />
 
-        {/* Topic label — sits below the host sprite, hoverable for full text */}
+        {/* Topic label — sits on the round table */}
         <div
           className="absolute -translate-x-1/2 group z-10"
-          style={{ top: '36%', left: '50%' }}
+          style={{ top: '57%', left: '50%' }}
         >
           <div className="px-3 py-1 bg-slate-800/90 border border-slate-600 rounded-full text-xs text-slate-300 max-w-[200px] text-center truncate cursor-default select-none">
             {session.topic}
@@ -191,10 +191,24 @@ function DebateStage({
           {session.status === 'failed'    && <span className="text-red-400">● failed</span>}
         </div>
 
-        {/* Podium */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-15">
-          <div className="w-14 h-8 border-2 border-amber-400 rounded-sm" />
-          <div className="w-10 h-3 bg-amber-400/60 mx-auto rounded-sm mt-0.5" />
+        {/* Round table */}
+        <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0" style={{ top: '60%' }}>
+          <div style={{
+            width: '296px', height: '184px', borderRadius: '50%',
+            background: 'radial-gradient(ellipse at 38% 32%, #c8915e 0%, #8b5e2c 50%, #5a3a14 100%)',
+            border: '3px solid #6b4420',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,150,0.15)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              background: 'radial-gradient(ellipse at 38% 32%, rgba(255,230,180,0.18), transparent 55%)',
+            }} />
+            <div style={{
+              position: 'absolute', inset: '12px', borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.07)',
+            }} />
+          </div>
         </div>
 
         {/* Agent sprites */}
@@ -259,7 +273,7 @@ function DebateStage({
                   : 'border-slate-600/30'
                 }`}
               >
-                {sprite && <PixelSprite sprite={sprite} size={8} />}
+                {sprite && <PixelSprite sprite={sprite} size={12} />}
               </div>
               <p className="mt-1 text-center text-[11px] font-semibold text-slate-100 leading-tight">{agent.name}</p>
               <p className="text-center text-[10px] uppercase tracking-wide text-slate-500">{slot.label}</p>

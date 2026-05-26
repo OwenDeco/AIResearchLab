@@ -95,6 +95,7 @@ class AgentConfigChatRequest(BaseModel):
     message: str
     history: List[AgentChatMessage] = []
     parent_run_id: Optional[str] = None  # set internally when called as a sub-agent
+    initiated_by: str = "user"
 
 
 # ---------------------------------------------------------------------------
@@ -177,7 +178,7 @@ async def agent_a2a_endpoint(config_id: str, request: Request, db: Session = Dep
 # Run tracking helpers
 # ---------------------------------------------------------------------------
 
-def _create_run(db: Session, cfg: Dict, message: str, parent_run_id: Optional[str] = None) -> str:
+def _create_run(db: Session, cfg: Dict, message: str, parent_run_id: Optional[str] = None, initiated_by: str = "user") -> str:
     from models_db import UnifiedRun, RunEvent
     from api.conn_log import log_conn_event
     run_id = str(uuid.uuid4())
@@ -187,7 +188,7 @@ def _create_run(db: Session, cfg: Dict, message: str, parent_run_id: Optional[st
         parent_run_id=parent_run_id,
         primary_domain="orchestration",
         run_type="agent_chat",
-        initiated_by="user",
+        initiated_by=initiated_by,
         status="running",
         started_at=now,
         source_id=cfg["id"],
@@ -378,7 +379,7 @@ async def chat_with_agent(
     tools_cfg = cfg.get("tools", {})
 
     # ---- Create UnifiedRun ------------------------------------------------
-    run_id = _create_run(db, cfg, body.message, parent_run_id=body.parent_run_id)
+    run_id = _create_run(db, cfg, body.message, parent_run_id=body.parent_run_id, initiated_by=body.initiated_by)
 
     # ---- 1. System prompt ------------------------------------------------
     base_prompt = cfg.get("system_prompt", "").strip()

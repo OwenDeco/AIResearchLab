@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { useAppStore } from '../store/useAppStore'
+import { censor } from '../utils/privacy'
 import { Spinner } from '../components/Spinner'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { Eye, EyeOff, CheckCircle2, XCircle, Plus, Trash2, ChevronDown, ChevronRight, Lock } from 'lucide-react'
@@ -45,10 +46,12 @@ function SecretInput({
   placeholder?: string
 }) {
   const [visible, setVisible] = useState(false)
+  const { privacyMode } = useAppStore()
+  const effectiveVisible = visible && !privacyMode
   return (
     <div className="relative">
       <input
-        type={visible ? 'text' : 'password'}
+        type={effectiveVisible ? 'text' : 'password'}
         className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm pr-9 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -58,12 +61,12 @@ function SecretInput({
       />
       <button
         type="button"
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-        onClick={() => setVisible((v) => !v)}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 transition-colors ${privacyMode ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+        onClick={() => { if (!privacyMode) setVisible((v) => !v) }}
         tabIndex={-1}
-        title={visible ? 'Hide' : 'Show'}
+        title={privacyMode ? 'Reveal disabled in privacy mode' : effectiveVisible ? 'Hide' : 'Show'}
       >
-        {visible ? <EyeOff size={15} /> : <Eye size={15} />}
+        {effectiveVisible ? <EyeOff size={15} /> : <Eye size={15} />}
       </button>
     </div>
   )
@@ -152,7 +155,8 @@ function SuggestionsPanel({
 }
 
 export function Settings() {
-  const { models, setModels } = useAppStore()
+  const { models, setModels, privacyMode } = useAppStore()
+  const privInput = (v: string) => privacyMode ? censor(v) : v
 
   const [form, setForm] = useState<ProviderSettings>({
     openai_api_key: '',
@@ -373,13 +377,20 @@ export function Settings() {
               />
             </Field>
             <Field label="Endpoint" hint="e.g. https://my-resource.openai.azure.com">
-              <input
-                type="text"
-                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={form.azure_endpoint}
-                onChange={(e) => set('azure_endpoint', e.target.value)}
-                placeholder="https://…"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.azure_endpoint}
+                  onChange={(e) => set('azure_endpoint', e.target.value)}
+                  placeholder="https://…"
+                />
+                {privacyMode && form.azure_endpoint && (
+                  <div className="absolute inset-0 flex items-center px-3 rounded bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-mono text-sm text-slate-700 dark:text-slate-200 select-none pointer-events-none overflow-hidden">
+                    {privInput(form.azure_endpoint)}
+                  </div>
+                )}
+              </div>
             </Field>
             <Field label="Deployment name" hint="The name you gave the model deployment in Azure">
               <input
@@ -410,13 +421,20 @@ export function Settings() {
           </div>
           <div className="space-y-3">
             <Field label="Base URL">
-              <input
-                type="text"
-                className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={form.ollama_base_url}
-                onChange={(e) => set('ollama_base_url', e.target.value)}
-                placeholder="http://localhost:11434"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  className="w-full border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.ollama_base_url}
+                  onChange={(e) => set('ollama_base_url', e.target.value)}
+                  placeholder="http://localhost:11434"
+                />
+                {privacyMode && form.ollama_base_url && (
+                  <div className="absolute inset-0 flex items-center px-3 rounded bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-mono text-sm text-slate-700 dark:text-slate-200 select-none pointer-events-none overflow-hidden">
+                    {privInput(form.ollama_base_url)}
+                  </div>
+                )}
+              </div>
             </Field>
             <Field label="Notes" hint="Optional — describe what this credential is for, e.g. supported models or project.">
               <textarea

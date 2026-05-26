@@ -1,60 +1,75 @@
 import type { SpriteDefinition } from './types'
 
 export const spriteLibrary: Record<string, SpriteDefinition> = {
+  // ── coderBlue ── yellow hair, blue shirt, dark navy pants ──────────────────
   coderBlue: {
     id: 'coderBlue',
     pixels: [
-      '..YY..',
-      '.YSSY.',
-      '.YGGY.',
-      '.BBBB.',
-      '.BMMB.',
-      'B....B',
+      '..HH..',  // hair top
+      '.HFFH.',  // hair sides + skin face
+      '.FEEF.',  // face + dark eyes
+      '.FMMF.',  // face + small mouth
+      '..FF..',  // neck
+      '.BBBB.',  // blue shirt torso
+      'B.BB.B',  // shirt + arms
+      'LL..LL',  // pants / legs
     ],
     palette: {
       '.': 'transparent',
-      Y: '#fde047',
-      S: '#334155',
-      G: '#f8fafc',
-      B: '#3b82f6',
-      M: '#93c5fd',
+      H: '#fde047',  // yellow hair
+      F: '#fcd7b0',  // skin
+      E: '#1e293b',  // eyes
+      M: '#c47070',  // mouth
+      B: '#3b82f6',  // blue shirt
+      L: '#1e3a5f',  // dark navy pants
     },
   },
+
+  // ── plannerGreen ── brown hair, green shirt, dark pants ────────────────────
   plannerGreen: {
     id: 'plannerGreen',
     pixels: [
-      '..YY..',
-      '.YSSY.',
-      '.YGGY.',
+      '..HH..',
+      '.HFFH.',
+      '.FEEF.',
+      '.FMMF.',
+      '..FF..',
       '.GGGG.',
-      '.GMMG.',
-      'G....G',
+      'G.GG.G',
+      'LL..LL',
     ],
     palette: {
       '.': 'transparent',
-      Y: '#facc15',
-      S: '#1f2937',
-      G: '#22c55e',
-      M: '#bbf7d0',
+      H: '#92400e',  // brown hair
+      F: '#fcd7b0',  // skin
+      E: '#1e293b',  // eyes
+      M: '#c47070',  // mouth
+      G: '#22c55e',  // green shirt
+      L: '#14532d',  // dark green pants
     },
   },
+
+  // ── reviewerPurple ── dark hair (wider), purple shirt, indigo pants ─────────
   reviewerPurple: {
     id: 'reviewerPurple',
     pixels: [
-      '..YY..',
-      '.YSSY.',
-      '.YGGY.',
+      '.HHHH.',  // wider dark hair
+      'HFFFFH',  // hair sides + face
+      '.FEEF.',
+      '.FMMF.',
+      '..FF..',
       '.PPPP.',
-      '.PMMP.',
-      'P....P',
+      'P.PP.P',
+      'LL..LL',
     ],
     palette: {
       '.': 'transparent',
-      Y: '#fde047',
-      S: '#312e81',
-      G: '#f8fafc',
-      P: '#8b5cf6',
-      M: '#ddd6fe',
+      H: '#1e293b',  // dark hair
+      F: '#fcd7b0',  // skin
+      E: '#312e81',  // dark indigo eyes
+      M: '#c47070',  // mouth
+      P: '#8b5cf6',  // purple shirt
+      L: '#312e81',  // indigo pants
     },
   },
 }

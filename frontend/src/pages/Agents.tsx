@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useAppStore } from '../store/useAppStore'
+import { censor } from '../utils/privacy'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,7 +108,7 @@ function ConfigureTab({
   registeredConnections: { a2a: any[]; mcp: any[] }
   allAgents: AgentConfig[]
 }) {
-  const { models } = useAppStore()
+  const { models, privacyMode } = useAppStore()
   const llmModels = models?.llms ?? []
   const embedModels = models?.embed_models ?? []
 
@@ -301,7 +302,7 @@ function ConfigureTab({
                       {conn.transport === 'streamable_http' ? 'HTTP' : 'SSE'}
                     </span>
                   )}
-                  <span className="text-xs text-slate-400 dark:text-slate-500 truncate">{conn.server_url}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 truncate">{privacyMode ? censor(conn.server_url ?? '') : conn.server_url}</span>
                 </label>
               ))}
             </div>
@@ -350,7 +351,7 @@ function ConfigureTab({
                     className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500"
                   />
                   <span className="text-sm text-slate-700 dark:text-slate-200">{conn.name}</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 truncate">{conn.task_url}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 truncate">{privacyMode ? censor(conn.task_url ?? '') : conn.task_url}</span>
                 </label>
               ))}
             </div>

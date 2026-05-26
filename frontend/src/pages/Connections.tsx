@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useAppStore } from '../store/useAppStore'
+import { censor } from '../utils/privacy'
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -35,6 +37,7 @@ interface Connection {
   description: string
   endpoints: Endpoint[]
   methods?: string[]
+  skills?: string[]
   models?: string[]
   stats?: Record<string, number>
 }
@@ -120,18 +123,29 @@ function SkillTagBadge({ tag }: { tag: string }) {
   )
 }
 
-function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
+function AgentCardViewer({
+  refreshKey = 0,
+  title = 'Agent Card',
+  subtitle = '/.well-known/agent.json',
+  fetchFn = () => api.getAgentCard(),
+}: {
+  refreshKey?: number
+  title?: string
+  subtitle?: string
+  fetchFn?: () => Promise<AgentCardData>
+}) {
   const [card, setCard] = useState<AgentCardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expanded, setExpanded] = useState(false)
   const [skillsExpanded, setSkillsExpanded] = useState(true)
+  const { privacyMode } = useAppStore()
 
   async function fetchCard() {
     setLoading(true)
     setError('')
     try {
-      const data = await api.getAgentCard()
+      const data = await fetchFn()
       setCard(data)
     } catch {
       setError('Could not load agent card.')
@@ -151,8 +165,8 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
       >
         <div className="flex items-center gap-2.5">
           <Bot size={16} className="text-violet-600 flex-shrink-0" />
-          <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Agent Card</span>
-          <span className="text-xs text-slate-400">/.well-known/agent.json</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{title}</span>
+          <span className="text-xs text-slate-400">{subtitle}</span>
           {card && (
             <span className="text-xs bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded font-mono">
               v{card.version}
@@ -255,7 +269,7 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-slate-400 dark:text-slate-500 w-20 flex-shrink-0">Task URL</span>
                 <span className="font-mono text-slate-600 dark:text-slate-300 truncate flex-1 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
-                  {card.url}
+                  {privacyMode ? censor(card.url) : card.url}
                 </span>
                 <CopyButton text={card.url} />
               </div>
@@ -269,6 +283,8 @@ function AgentCardViewer({ refreshKey = 0 }: { refreshKey?: number }) {
 
 function ConnectionCard({ conn }: { conn: Connection }) {
   const dimmed = conn.status === 'not_configured'
+  const { privacyMode } = useAppStore()
+  const priv = (v: string) => privacyMode ? censor(v) : v
 
   return (
     <div className={`bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 shadow-sm p-5 flex flex-col gap-3 transition-opacity ${dimmed ? 'opacity-60' : ''}`}>
@@ -291,10 +307,10 @@ function ConnectionCard({ conn }: { conn: Connection }) {
             <div key={ep.label} className="flex items-center gap-2 text-xs">
               <span className="text-slate-400 w-24 flex-shrink-0">{ep.label}</span>
               <span className="font-mono text-slate-700 dark:text-slate-200 truncate flex-1 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
-                {ep.url}
+                {priv(ep.url)}
               </span>
               {ep.url.startsWith('http') && <CopyButton text={ep.url} />}
-              {ep.url.startsWith('http') && (
+              {ep.url.startsWith('http') && !privacyMode && (
                 <a href={ep.url} target="_blank" rel="noreferrer"
                   className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0">
                   <ExternalLink size={13} />
@@ -313,6 +329,20 @@ function ConnectionCard({ conn }: { conn: Connection }) {
             {conn.methods.map((m) => (
               <span key={m} className="text-xs font-mono bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded">
                 {m}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Skills */}
+      {conn.skills && conn.skills.length > 0 && (
+        <div>
+          <p className="text-xs text-slate-400 mb-1.5">Skills</p>
+          <div className="flex flex-wrap gap-1">
+            {conn.skills.map((s) => (
+              <span key={s} className="text-xs font-mono bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700 px-1.5 py-0.5 rounded">
+                {s}
               </span>
             ))}
           </div>
@@ -383,6 +413,9 @@ function RegisteredCard({
   onDelete: (id: string) => void
   onToggleAgentTool?: (id: string, enabled: boolean) => void
 }) {
+  const { privacyMode } = useAppStore()
+  const priv = (v: string) => privacyMode ? censor(v) : v
+
   const [showTest, setShowTest] = useState(false)
 
   // A2A ping state
@@ -484,7 +517,7 @@ function RegisteredCard({
       <div className="text-xs flex items-center gap-2">
         <span className="text-slate-400 w-16 flex-shrink-0">{conn.type === 'a2a' ? 'Task URL' : 'Server URL'}</span>
         <span className="font-mono text-slate-600 dark:text-slate-300 truncate flex-1 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
-          {conn.type === 'a2a' ? conn.task_url : conn.server_url}
+          {priv(conn.type === 'a2a' ? (conn.task_url ?? '') : (conn.server_url ?? ''))}
         </span>
         <CopyButton text={(conn.type === 'a2a' ? conn.task_url : conn.server_url) ?? ''} />
       </div>
@@ -661,6 +694,9 @@ function RegisteredCard({
 }
 
 export function Connections() {
+  const { privacyMode } = useAppStore()
+  const priv = (v: string) => privacyMode ? censor(v) : v
+
   const [data, setData] = useState<ConnectionsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -843,8 +879,14 @@ export function Connections() {
             </div>
 
             {/* Agent Card viewer */}
-            <div className="mt-4">
+            <div className="mt-4 space-y-3">
               <AgentCardViewer refreshKey={agentCardRefreshKey} />
+              <AgentCardViewer
+                refreshKey={agentCardRefreshKey}
+                title="OS Debate A2A Agent Card"
+                subtitle="/api/os-debate/a2a/agent.json"
+                fetchFn={() => api.getOSDebateAgentCard()}
+              />
             </div>
 
             {/* Public Access — merged URL + tunnel card */}
@@ -875,9 +917,9 @@ export function Connections() {
                       <div className="flex items-center gap-2 text-xs">
                         <span className="text-slate-400 flex-shrink-0 w-20">Tunnel URL</span>
                         <span className="font-mono text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-600 truncate flex-1">
-                          {ngrok.url}
+                          {priv(ngrok.url ?? '')}
                         </span>
-                        <CopyButton text={ngrok.url} />
+                        <CopyButton text={ngrok.url ?? ''} />
                       </div>
                     </div>
                   )}

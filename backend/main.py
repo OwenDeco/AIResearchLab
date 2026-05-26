@@ -127,6 +127,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _migrate_unified_runs(engine)
     logger.info("Database tables ready.")
 
+    # 1b. Seed built-in agent configs
+    from api.routes.os_debate import seed_optimistic_agent as _seed_optimistic
+    _seed_db = SessionLocal()
+    try:
+        _seed_optimistic(_seed_db)
+    finally:
+        _seed_db.close()
+
     # 2. Init ChromaDB persistent client + collection
     chroma_client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
     chroma_collection = chroma_client.get_or_create_collection(
@@ -261,6 +269,8 @@ from api.routes.analytics import router as analytics_router                     
 from api.routes.unified_runs import router as unified_runs_router                  # noqa: E402
 from api.routes.agent_configs import router as agent_configs_router                # noqa: E402
 from api.routes.debate import router as debate_router                              # noqa: E402
+from api.routes.os_debate import router as os_debate_router                        # noqa: E402
+from api.routes.agent_chat import router as agent_chat_router                      # noqa: E402
 
 app.include_router(documents_router, prefix="/api")
 app.include_router(models_router, prefix="/api")
@@ -278,6 +288,8 @@ app.include_router(analytics_router, prefix="/api")
 app.include_router(unified_runs_router, prefix="/api")
 app.include_router(agent_configs_router, prefix="/api")
 app.include_router(debate_router, prefix="/api")
+app.include_router(os_debate_router, prefix="/api")
+app.include_router(agent_chat_router, prefix="/api")
 app.include_router(a2a_router)           # no /api prefix — A2A lives at root
 app.mount("/mcp", mcp_sse_app)           # MCP SSE transport: /mcp/sse + /mcp/messages
 

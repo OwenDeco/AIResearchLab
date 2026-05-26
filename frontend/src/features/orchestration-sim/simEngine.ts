@@ -73,11 +73,11 @@ export function initAgents(run: SimRun, children: SimRun[]): AgentState[] {
   return [orch, ...subs]
 }
 
-export function mergeWithNewChildren(run: SimRun, children: SimRun[], existing: AgentState[]): AgentState[] {
+export function mergeWithNewChildren(_run: SimRun, children: SimRun[], existing: AgentState[]): AgentState[] {
   const existingIds = new Set(existing.map(a => a.id))
   const newChildren: AgentState[] = []
 
-  children.forEach((c, i) => {
+  children.forEach((c) => {
     if (existingIds.has(c.id)) return
     const subIndex = existing.length - 1 + newChildren.length
     const sx = 68 + (subIndex % 2) * 14

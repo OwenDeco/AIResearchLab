@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { RefreshCw, Trash2 } from 'lucide-react'
 import { api } from '../api/client'
 import { parseUTC } from '../utils/date'
+import { useAppStore } from '../store/useAppStore'
+import { redactSensitive } from '../utils/privacy'
 
 interface LogEntry {
   id: string
@@ -53,6 +55,9 @@ function traceColor(id: string): string {
 type Direction = 'all' | 'inbound' | 'outbound' | 'internal' | 'system'
 
 export function Logs() {
+  const { privacyMode } = useAppStore()
+  const priv = (v: string) => privacyMode ? redactSensitive(v) : v
+
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -209,8 +214,8 @@ export function Logs() {
                       )}
                     </td>
                     <td className="px-4 py-2.5 font-mono text-slate-500 dark:text-slate-400">{log.event_type}</td>
-                    <td className="px-4 py-2.5 text-slate-700 dark:text-slate-200">{log.summary}</td>
-                    <td className="px-4 py-2.5 font-mono text-slate-400 dark:text-slate-500 truncate max-w-[7rem]">{log.caller ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-slate-700 dark:text-slate-200">{priv(log.summary)}</td>
+                    <td className="px-4 py-2.5 font-mono text-slate-400 dark:text-slate-500 truncate max-w-[7rem]">{log.caller ? priv(log.caller) : '—'}</td>
                   </tr>
                 )
               })}
