@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     # that will synthesize the answer, skipping the extra round-trip entirely.
     A2A_SYNTHESIZE: bool = True
 
+    # OutSystems — debate API endpoint and credentials
+    OS_DEBATE_ENDPOINT: str = "https://harmonygroup-dev.outsystems.app/ONE2026/rest/OSAgent/StartDebate"
+    OS_API_USERNAME: str = ""
+    OS_API_PASSWORD: str = ""
+
     # Debug — enables verbose request/response logging for MCP paths
     DEBUG: bool = False
 

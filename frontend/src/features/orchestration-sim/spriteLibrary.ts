@@ -49,6 +49,30 @@ export const spriteLibrary: Record<string, SpriteDefinition> = {
     },
   },
 
+  // ── guestOrange ── red hair, orange shirt, brown pants ────────────────────
+  guestOrange: {
+    id: 'guestOrange',
+    pixels: [
+      '..HH..',
+      '.HFFH.',
+      '.FEEF.',
+      '.FMMF.',
+      '..FF..',
+      '.OOOO.',
+      'O.OO.O',
+      'LL..LL',
+    ],
+    palette: {
+      '.': 'transparent',
+      H: '#ef4444',  // red hair
+      F: '#fcd7b0',  // skin
+      E: '#1e293b',  // eyes
+      M: '#c47070',  // mouth
+      O: '#f97316',  // orange shirt
+      L: '#7c2d12',  // brown pants
+    },
+  },
+
   // ── reviewerPurple ── dark hair (wider), purple shirt, indigo pants ─────────
   reviewerPurple: {
     id: 'reviewerPurple',

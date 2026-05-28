@@ -124,7 +124,7 @@ export function Layout() {
         </div>
 
         {/* Nav groups */}
-        <nav className="flex-1 py-2 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 py-2 overflow-y-auto overflow-x-hidden sidebar-scroll">
           {navGroups.map((group, gi) => (
             <div key={gi} className={gi > 0 ? 'mt-3' : ''}>
               {!collapsed && (

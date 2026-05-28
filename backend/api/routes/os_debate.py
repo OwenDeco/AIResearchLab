@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-import time
+import re
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -24,7 +24,34 @@ from api.deps import get_db
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/os-debate", tags=["OS Debate Room"])
 
-_OS_START_DEBATE_URL = "https://harmonygroup-dev.outsystems.app/ONE2026/rest/OSAgent/StartDebate"
+def _os_auth() -> httpx.BasicAuth | None:
+    from config import settings
+    if settings.OS_API_USERNAME and settings.OS_API_PASSWORD:
+        return httpx.BasicAuth(settings.OS_API_USERNAME, settings.OS_API_PASSWORD)
+    return None
+
+
+async def _call_os_start(payload: Dict) -> httpx.Response:
+    """POST to the OutSystems StartDebate endpoint with auth and standard headers."""
+    from config import settings
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            settings.OS_DEBATE_ENDPOINT,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            auth=_os_auth(),
+        )
+    logger.info(
+        "OS StartDebate response | status=%s body=%.200s",
+        resp.status_code, resp.text,
+    )
+    resp.raise_for_status()
+    return resp
+
+
+def _build_summary(turns: List[Dict], limit: int = 15) -> str:
+    """Summarise the last `limit` turns as 'Name: content' lines."""
+    return "\n".join(f"{t['agent_name']}: {t['content']}" for t in turns[-limit:])
 
 _SESSIONS_KEY = "os_debate_sessions"
 _MAX_SESSIONS  = 50
@@ -109,8 +136,9 @@ def _derive_host_turn_type(existing_host_turns: int, rounds: int) -> str:
 # ---------------------------------------------------------------------------
 
 class OSStartExternalRequest(BaseModel):
-    rounds: int   = Field(..., ge=1, le=5, description="Number of debate rounds (1–5).")
-    Question: str = Field(..., min_length=1, description="The debate question or topic.")
+    rounds: int        = Field(..., ge=1, le=5, description="Number of debate rounds (1–5).")
+    Question: str      = Field(..., min_length=1, description="The debate question or topic.")
+    human_in_loop: bool = Field(False, description="If true, the user joins as guest speaker after each OS round.")
 
 
 class OSStartExternalResponse(BaseModel):
@@ -147,6 +175,17 @@ class OSTurnResponse(BaseModel):
     turn_id: str  = Field(..., description="UUID assigned to this turn.")
 
 
+class OSHumanTurnRequest(BaseModel):
+    content:  str  = Field(..., min_length=1, description="The human guest's response.")
+    is_final: bool = Field(False, description="If true, end the debate after this turn.")
+
+
+class OSHumanTurnResponse(BaseModel):
+    ok:                   bool = Field(..., description="True when the turn was stored.")
+    turn_id:              str  = Field(..., description="UUID assigned to this turn.")
+    next_round_triggered: bool = Field(..., description="Whether a new OS round was triggered.")
+
+
 class OSCompleteResponse(BaseModel):
     ok: bool = Field(..., description="True when the session was marked completed.")
 
@@ -168,6 +207,36 @@ _OS_CRITICAL_SYSTEM_PROMPT = (
     "Keep your responses focused, constructive, and concise — 2–3 sentences per turn. "
     "Your response must never exceed 400 characters."
 )
+
+
+_OS_TEST_SESSION_ID = "a9980138-ea20-4fb4-b550-c08873ea2999"
+
+
+def seed_test_session(db: Session) -> None:
+    """Ensure the OutSystems test-case session always exists as a dummy."""
+    sessions = _load_sessions(db)
+    if any(s["id"] == _OS_TEST_SESSION_ID for s in sessions):
+        return
+    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    sessions.append({
+        "id":                _OS_TEST_SESSION_ID,
+        "status":            "running",
+        "host_id":           OSAgent.host,
+        "guest_ids":         [OSAgent.optimistic, OSAgent.critical],
+        "topic":             "OutSystems test session",
+        "rounds":            1,
+        "turns":             [],
+        "started_at":        now,
+        "ended_at":          None,
+        "source":            "outsystems",
+        "human_in_loop":     False,
+        "total_human_rounds": None,
+        "os_rounds_done":    0,
+        "host_turn_offset":  0,
+        "finalizing":        False,
+    })
+    _save_sessions(db, sessions)
+    logger.info("Seeded OS test session %s", _OS_TEST_SESSION_ID)
 
 
 def seed_optimistic_agent(db: Session) -> str:
@@ -258,36 +327,39 @@ async def start_os_debate_external(
 ):
     # Create a local session pre-populated with the fixed agent structure
     session_id = str(uuid.uuid4())
+    os_rounds = 1 if body.human_in_loop else body.rounds
     session: Dict[str, Any] = {
-        "id":         session_id,
-        "status":     "running",
-        "host_id":    OSAgent.host,
-        "guest_ids":  [OSAgent.optimistic, OSAgent.critical],
-        "topic":      body.Question,
-        "rounds":     body.rounds,
-        "turns":      [],
-        "started_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
-        "ended_at":   None,
-        "source":     "outsystems",
+        "id":                session_id,
+        "status":            "running",
+        "host_id":           OSAgent.host,
+        "guest_ids":         [OSAgent.optimistic, OSAgent.critical],
+        "topic":             body.Question,
+        "rounds":            os_rounds,
+        "turns":             [],
+        "started_at":        datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+        "ended_at":          None,
+        "source":            "outsystems",
+        "human_in_loop":      body.human_in_loop,
+        "total_human_rounds": body.rounds if body.human_in_loop else None,
+        "os_rounds_done":     0,
+        "host_turn_offset":   0,
+        "finalizing":         False,
     }
     sessions = _load_sessions(db)
     sessions.append(session)
     _save_sessions(db, sessions)
 
     # Call OutSystems — pass session_id so agents know where to push turns
+    logger.info("OS StartDebate call | session=%s rounds=%s", session_id[:8], os_rounds)
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                _OS_START_DEBATE_URL,
-                json={"rounds": body.rounds, "Question": body.Question, "session_id": session_id},
-                headers={"Content-Type": "application/json"},
-            )
-        resp.raise_for_status()
+        resp = await _call_os_start({"rounds": os_rounds, "Question": body.Question, "session_id": session_id})
         os_triggered = resp.text.strip().lower() == "true"
     except httpx.HTTPStatusError as exc:
+        logger.error("OS StartDebate HTTP error | session=%s %s", session_id[:8], exc)
         _update_session(db, session_id, {"status": "failed"})
         raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
     except httpx.RequestError as exc:
+        logger.error("OS StartDebate request error | session=%s %s", session_id[:8], exc)
         _update_session(db, session_id, {"status": "failed"})
         raise HTTPException(status_code=502, detail=f"OutSystems unreachable: {exc}")
 
@@ -328,8 +400,13 @@ async def start_os_debate_external(
         422: {"description": "Validation error — check agent value and session_id format."},
     },
 )
-def push_os_turn(body: OSTurnRequest, request: Request, db: Session = Depends(get_db)):
+async def push_os_turn(body: OSTurnRequest, request: Request, db: Session = Depends(get_db)):
     from api.conn_log import log_conn_event
+
+    logger.info(
+        "OS turn received | session=%s agent=%s content=%.120s",
+        body.session_id[:8], body.agent, body.content,
+    )
 
     sessions = _load_sessions(db)
     session  = next((s for s in sessions if s["id"] == body.session_id), None)
@@ -341,7 +418,11 @@ def push_os_turn(body: OSTurnRequest, request: Request, db: Session = Depends(ge
     # Derive turn_type from role and position
     if body.agent == OSAgent.host:
         existing_host = sum(1 for t in session["turns"] if t["agent_id"] == OSAgent.host)
-        turn_type = _derive_host_turn_type(existing_host, session["rounds"])
+        if session.get("human_in_loop"):
+            offset = session.get("host_turn_offset", 0)
+            turn_type = _derive_host_turn_type(existing_host - offset, 1)
+        else:
+            turn_type = _derive_host_turn_type(existing_host, session["rounds"])
     else:
         turn_type = "speak"
 
@@ -357,10 +438,36 @@ def push_os_turn(body: OSTurnRequest, request: Request, db: Session = Depends(ge
     }
     session["turns"].append(turn)
 
-    # Auto-complete on closing host turn
+    # Auto-complete on closing host turn (or pause for human in human-in-loop mode)
     if turn_type == "close":
-        session["status"]   = "completed"
-        session["ended_at"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+        if session.get("finalizing"):
+            # Final closing turn requested after last human round — debate ends here.
+            session["finalizing"] = False
+            session["status"]     = "completed"
+            session["ended_at"]   = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+        elif session.get("human_in_loop"):
+            session["os_rounds_done"] = session.get("os_rounds_done", 0) + 1
+            session["status"] = "waiting_for_human"
+        else:
+            # Non-human: request a final closing statement from OS before completing.
+            # Save finalizing=True BEFORE calling OS so any inbound callback sees the flag.
+            summary = _build_summary(session["turns"])
+            closing_context = (
+                f"{session['topic']}\n\n"
+                f"Full discussion:\n{summary}\n\n"
+                "Please provide a brief closing statement to conclude the debate."
+            )
+            session["finalizing"] = True
+            session["status"]     = "running"
+            _save_sessions(db, sessions)  # persist before OS call — prevents race condition
+            logger.info("OS finished=True call | session=%s", body.session_id[:8])
+            try:
+                await _call_os_start({"rounds": 1, "Question": closing_context, "session_id": body.session_id, "finished": True})
+            except Exception as exc:
+                logger.error("Failed to trigger non-human closing OS round: %s", exc)
+                session["finalizing"] = False
+                session["status"]     = "failed"
+                # outer _save_sessions persists the failure
 
     _save_sessions(db, sessions)
 
@@ -397,8 +504,32 @@ def push_os_turn(body: OSTurnRequest, request: Request, db: Session = Depends(ge
     ),
 )
 def complete_os_debate_session(session_id: str, db: Session = Depends(get_db)):
-    if not any(s["id"] == session_id for s in _load_sessions(db)):
+    sessions = _load_sessions(db)
+    session  = next((s for s in sessions if s["id"] == session_id), None)
+    if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    # In human-in-loop mode the human controls when the debate ends.
+    # OS calls /complete after each round instead of sending a closing host turn,
+    # so we intercept it here and pause for human input instead.
+    if session.get("human_in_loop"):
+        if session.get("finalizing"):
+            # OS completed the final closing round — end the debate.
+            session["finalizing"] = False
+            session["status"]     = "completed"
+            session["ended_at"]   = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+            _save_sessions(db, sessions)
+            return OSCompleteResponse(ok=True)
+        if session.get("status") == "waiting_for_human":
+            return OSCompleteResponse(ok=True)  # already paused, ignore duplicate
+        if session.get("status") == "running":
+            session["os_rounds_done"] = session.get("os_rounds_done", 0) + 1
+            session["status"] = "waiting_for_human"
+            _save_sessions(db, sessions)
+            return OSCompleteResponse(ok=True)
+    # Non-human + finalizing: still waiting for the final closing turn from OS.
+    if session.get("finalizing"):
+        return OSCompleteResponse(ok=True)
+
     _update_session(db, session_id, {
         "status":   "completed",
         "ended_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
@@ -426,13 +557,86 @@ def stop_os_debate_session(session_id: str, db: Session = Depends(get_db)):
     session = next((s for s in sessions if s["id"] == session_id), None)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
-    if session["status"] != "running":
+    if session["status"] not in ("running", "waiting_for_human"):
         raise HTTPException(status_code=409, detail=f"Session is already '{session['status']}'")
     _update_session(db, session_id, {
         "status":   "stopped",
         "ended_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
     })
     return OSStopResponse(ok=True)
+
+
+# ---------------------------------------------------------------------------
+# Human turn — guest speaker submits their response
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/{session_id}/human-turn",
+    response_model=OSHumanTurnResponse,
+    summary="Submit a human guest speaker turn",
+)
+async def post_human_turn(session_id: str, body: OSHumanTurnRequest, db: Session = Depends(get_db)):
+    sessions = _load_sessions(db)
+    session  = next((s for s in sessions if s["id"] == session_id), None)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if not session.get("human_in_loop"):
+        raise HTTPException(status_code=400, detail="Session is not in human-in-loop mode")
+    if session.get("status") != "waiting_for_human":
+        raise HTTPException(status_code=409, detail=f"Session is not waiting for human input (status: {session.get('status')})")
+
+    turn_id = str(uuid.uuid4())
+    session["turns"].append({
+        "id":         turn_id,
+        "agent_id":   "human",
+        "agent_name": "You",
+        "role":       "Guest Speaker",
+        "content":    body.content,
+        "turn_type":  "speak",
+        "timestamp":  datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+    })
+
+    # Build context from the full discussion so far
+    summary = _build_summary(session["turns"])
+
+    if body.is_final:
+        # Ask OS to deliver one final host closing statement, then we end the debate.
+        closing_context = (
+            f"{session['topic']}\n\n"
+            f"Full discussion:\n{summary}\n\n"
+            "Please provide a brief closing statement to conclude the debate."
+        )
+        session["host_turn_offset"] = sum(1 for t in session["turns"] if t["agent_id"] == OSAgent.host)
+        session["finalizing"]       = True
+        session["status"]           = "running"
+        _save_sessions(db, sessions)
+
+        logger.info("OS human finished=True call | session=%s", session_id[:8])
+        try:
+            await _call_os_start({"rounds": 1, "Question": closing_context, "session_id": session_id, "finished": True})
+        except Exception as exc:
+            logger.error("OS human finished=True error | session=%s %s", session_id[:8], exc)
+            _update_session(db, session_id, {"status": "failed"})
+            raise HTTPException(status_code=502, detail=f"Failed to trigger closing OS round: {exc}")
+
+        return OSHumanTurnResponse(ok=True, turn_id=turn_id, next_round_triggered=True)
+
+    # Not final — continue with next OS round
+    next_question = f"{session['topic']}\n\nDiscussion so far:\n{summary}\n\nContinue the debate."
+
+    session["host_turn_offset"] = sum(1 for t in session["turns"] if t["agent_id"] == OSAgent.host)
+    session["status"]           = "running"
+    _save_sessions(db, sessions)
+
+    logger.info("OS next-round call | session=%s", session_id[:8])
+    try:
+        await _call_os_start({"rounds": 1, "Question": next_question, "session_id": session_id})
+    except Exception as exc:
+        logger.error("OS next-round error | session=%s %s", session_id[:8], exc)
+        _update_session(db, session_id, {"status": "failed"})
+        raise HTTPException(status_code=502, detail=f"Failed to trigger next OS round: {exc}")
+
+    return OSHumanTurnResponse(ok=True, turn_id=turn_id, next_round_triggered=True)
 
 
 # ---------------------------------------------------------------------------
@@ -519,10 +723,9 @@ def _a2a_err(rpc_id: Any, code: int, message: str) -> Dict:
 
 
 def _extract_session_id(text: str) -> Optional[str]:
-    import re as _re
-    m = _re.search(
+    m = re.search(
         r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
-        text, _re.I,
+        text, re.I,
     )
     return m.group(0) if m else None
 

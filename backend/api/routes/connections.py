@@ -16,10 +16,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/connections", tags=["connections"])
 
 def get_effective_base_url() -> str:
-    """Return the active ngrok tunnel URL, or localhost fallback."""
+    """Return the active ngrok tunnel URL, configured AGENT_BASE_URL, or localhost fallback."""
     from api.routes.ngrok import _is_running, _url as ngrok_url
     if _is_running() and ngrok_url:
         return ngrok_url
+    if settings.AGENT_BASE_URL and settings.AGENT_BASE_URL != "http://localhost:8002":
+        return settings.AGENT_BASE_URL
     return "http://localhost:8002"
 
 

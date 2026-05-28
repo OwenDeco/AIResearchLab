@@ -572,13 +572,18 @@ export const api = {
     return res.data
   },
 
-  async startOSDebateExternal(body: { rounds: number; Question: string }): Promise<{ session_id: string; os_triggered: boolean }> {
+  async startOSDebateExternal(body: { rounds: number; Question: string; human_in_loop?: boolean }): Promise<{ session_id: string; os_triggered: boolean }> {
     const res = await http.post('/os-debate/start-external', body)
     return res.data
   },
 
   async stopOSDebateSession(sessionId: string): Promise<{ ok: boolean }> {
     const res = await http.post(`/os-debate/${sessionId}/stop`)
+    return res.data
+  },
+
+  async postHumanTurn(sessionId: string, body: { content: string; is_final: boolean }): Promise<{ ok: boolean; turn_id: string; next_round_triggered: boolean }> {
+    const res = await http.post(`/os-debate/${sessionId}/human-turn`, body)
     return res.data
   },
 

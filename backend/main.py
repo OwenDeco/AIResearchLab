@@ -127,11 +127,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _migrate_unified_runs(engine)
     logger.info("Database tables ready.")
 
-    # 1b. Seed built-in agent configs
-    from api.routes.os_debate import seed_optimistic_agent as _seed_optimistic
+    # 1b. Seed built-in agent configs and test fixtures
+    from api.routes.os_debate import seed_optimistic_agent as _seed_optimistic, seed_test_session as _seed_test_session
     _seed_db = SessionLocal()
     try:
         _seed_optimistic(_seed_db)
+        _seed_test_session(_seed_db)
     finally:
         _seed_db.close()
 
