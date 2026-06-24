@@ -47,41 +47,9 @@ def _agent_card() -> Dict[str, Any]:
     from api.routes.connections import get_effective_base_url
     base = get_effective_base_url().rstrip("/")
 
-    skills = [
-        {
-            "id": "project-qa",
-            "name": "Project Q&A",
-            "description": (
-                "Answer any question about the RAG Lab application: "
-                "API endpoints, retrieval modes, chunking strategies, "
-                "graph extraction, benchmarking, model providers, "
-                "environment variables, and frontend pages."
-            ),
-            "tags": ["rag", "documentation", "qa", "api-reference"],
-            "examples": [
-                "What retrieval modes are available?",
-                "How do I configure Azure OpenAI?",
-                "What does the alpha parameter do in hybrid retrieval?",
-                "Which API endpoint lists all documents?",
-                "How does graph extraction work?",
-                "What metrics does the benchmark produce?",
-            ],
-        }
-    ]
-
-    # Append one skill per native data tool
-    try:
-        from api.routes.mcp_server import NATIVE_TOOL_SCHEMAS
-        for schema in NATIVE_TOOL_SCHEMAS:
-            fn = schema["function"]
-            skills.append({
-                "id": f"native-{fn['name']}",
-                "name": fn["name"].replace("_", " ").title(),
-                "description": fn["description"],
-                "tags": ["native", "data"],
-            })
-    except Exception:
-        pass
+    # Card advertises only registered external MCP servers — no internal
+    # (project Q&A / native data) actions.
+    skills: List[Dict[str, Any]] = []
 
     # Append one skill per enabled MCP connection
     for conn in _load_mcp_connections():
@@ -107,12 +75,10 @@ def _agent_card() -> Dict[str, Any]:
     return {
         "name": "RAG Lab Agent",
         "description": (
-            "Expert assistant for the RAG Lab platform. "
-            "Answers questions about API endpoints and parameters, retrieval modes "
-            "(lexical, vector, hybrid, graph_rag, parent_child, semantic_rerank), "
-            "chunking strategies, graph extraction, benchmarking metrics, "
-            "model configuration, environment variables, and all frontend features. "
-            "Also connects to registered external MCP servers as tools."
+            "This agent exposes a zorgplan MCP server, integrated through MuleSoft "
+            "and ONS. Use it to retrieve the actuele zorgplannen (current care "
+            "plans) of patients. It forwards each request to the connected zorgplan "
+            "MCP server tool and returns the result; it exposes no other actions."
         ),
         "url": f"{base}/a2a",
         "version": "1.0.0",
@@ -198,6 +164,20 @@ def _jsonrpc_error(rpc_id: Any, code: int, message: str) -> Dict:
 # ---------------------------------------------------------------------------
 
 _MAX_TOOL_ITERATIONS = 10
+
+# Returned by the inbound A2A agent (mcp_only mode) when the registered MCP
+# server tool could not be used or produced nothing.
+_NO_RESULT_MESSAGE = "No result was found."
+
+# Minimal system prompt for mcp_only mode. The inbound A2A agent must act purely
+# as a gateway to the registered MCP server tool — it gets no documentation or
+# other context beyond the caller's own request, so each LLM call stays small.
+_MCP_ONLY_SYSTEM_PROMPT = (
+    "You are a tool gateway. Use only the provided tool(s) to fulfil the user's "
+    "request, calling them with the information in the request itself. Do not add "
+    "outside knowledge or context. If no tool can satisfy the request, return "
+    "nothing."
+)
 
 
 def _log_trace(
@@ -346,6 +326,7 @@ async def _run_agent_loop(
     trace_id: Optional[str] = None,
     run_id: Optional[str] = None,
     platform_only: bool = False,
+    mcp_only: bool = False,
 ) -> str:
     """
     Full tool-calling agent loop.
@@ -368,6 +349,14 @@ async def _run_agent_loop(
         mcp_openai_tools, mcp_name_map = [], {}
         a2a_openai_tools, a2a_name_map = {}, {}
         all_tools = []
+    elif mcp_only:
+        # Inbound A2A gateway: registered MCP server tools ONLY — no native
+        # data tools, no external A2A agents. If the MCP tool can't be used the
+        # loop returns _NO_RESULT_MESSAGE rather than answering from knowledge.
+        connections = _load_mcp_connections()
+        mcp_openai_tools, mcp_name_map = _build_agent_tools(connections)
+        a2a_openai_tools, a2a_name_map = {}, {}
+        all_tools = list(mcp_openai_tools)
     else:
         connections = _load_mcp_connections()
         mcp_openai_tools, mcp_name_map = _build_agent_tools(connections)
@@ -375,8 +364,11 @@ async def _run_agent_loop(
         a2a_openai_tools, a2a_name_map = _build_a2a_tools(a2a_agents)
         all_tools = NATIVE_TOOL_SCHEMAS + mcp_openai_tools + a2a_openai_tools
 
+    # mcp_only mode uses a tiny gateway prompt — no documentation context — so
+    # each call only carries the original request plus the tool schema.
+    system_content = _MCP_ONLY_SYSTEM_PROMPT if mcp_only else _build_system_prompt()
     full_messages: List[Dict] = [
-        {"role": "system", "content": _build_system_prompt()}
+        {"role": "system", "content": system_content}
     ] + list(messages)
 
     agent_model = settings.AGENT_MODEL
@@ -393,6 +385,10 @@ async def _run_agent_loop(
 
     # If the provider doesn't support tool calling, fall back to plain Q&A
     if not hasattr(llm, "complete_with_tools") or not all_tools:
+        if mcp_only:
+            # No usable MCP tool (none registered/enabled, or provider can't
+            # call tools) — never answer from internal knowledge here.
+            return _NO_RESULT_MESSAGE
         try:
             response = llm.complete(messages=full_messages, temperature=0.2, max_tokens=2048)
         except Exception as exc:
@@ -404,6 +400,10 @@ async def _run_agent_loop(
                             "prompt_tokens": response.prompt_tokens,
                             "completion_tokens": response.completion_tokens})
         return response.content
+
+    # Track successful MCP tool outputs so mcp_only mode can tell whether the
+    # registered MCP server was actually used.
+    mcp_success_results: List[str] = []
 
     for iteration in range(_MAX_TOOL_ITERATIONS):
         _log_trace(trace_id, event_type="llm_tool_selection", direction="internal",
@@ -429,6 +429,10 @@ async def _run_agent_loop(
                        details={"model": active_model, "iteration": iteration + 1, "tool_calls": 0,
                                 "prompt_tokens": response.prompt_tokens,
                                 "completion_tokens": response.completion_tokens})
+            if mcp_only and not mcp_success_results:
+                # Model answered without ever using the MCP server tool — in
+                # mcp_only mode that internal answer is not allowed.
+                return _NO_RESULT_MESSAGE
             return response.content
 
         chosen_names = [tc["function"]["name"] for tc in response.tool_calls]
@@ -452,6 +456,8 @@ async def _run_agent_loop(
             fn_name = tc["function"]["name"]
             fn_args = json.loads(tc["function"]["arguments"] or "{}")
             tool_call_id = tc["id"]
+            is_mcp_tool = fn_name in mcp_name_map
+            tool_errored = False
 
             try:
                 if fn_name in NATIVE_TOOL_FNS:
@@ -506,10 +512,13 @@ async def _run_agent_loop(
                     result = f"Unknown tool: {fn_name}"
             except BaseException as exc:
                 result = f"Tool error: {_unwrap_exception(exc)}"
+                tool_errored = True
                 logger.warning("Agent: tool '%s' failed: %s", fn_name, result)
 
             result_str = str(result)
             iteration_results.append(result_str)
+            if is_mcp_tool and not tool_errored and result_str.strip():
+                mcp_success_results.append(result_str)
             full_messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call_id,
@@ -553,8 +562,12 @@ async def _run_agent_loop(
                        connection_type="agent",
                        summary="Synthesis skipped (A2A_SYNTHESIZE=false) — returning raw tool results",
                        details={"tool_count": len(iteration_results)})
+            if mcp_only:
+                return "\n\n".join(mcp_success_results) if mcp_success_results else _NO_RESULT_MESSAGE
             return "\n\n".join(iteration_results)
 
+    if mcp_only and not mcp_success_results:
+        return _NO_RESULT_MESSAGE
     return "I reached the maximum number of tool calls without a final answer."
 
 
@@ -562,12 +575,14 @@ async def _run_agent_async(
     user_text: str,
     trace_id: Optional[str] = None,
     run_id: Optional[str] = None,
+    mcp_only: bool = False,
 ) -> str:
     """Single-turn entry point — used by A2A endpoint and MCP server tool."""
     return await _run_agent_loop(
         [{"role": "user", "content": user_text}],
         trace_id=trace_id,
         run_id=run_id,
+        mcp_only=mcp_only,
     )
 
 
@@ -592,7 +607,7 @@ async def _handle_tasks_send(
     working_task = _make_task(task_id, "working", context_id=context_id)
     _tasks[task_id] = working_task
 
-    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id)
+    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, mcp_only=True)
 
     completed_task = _make_task(task_id, "completed", answer, context_id=context_id)
     _tasks[task_id] = completed_task
@@ -638,7 +653,7 @@ async def _stream_tasks_send_subscribe(
 
     _tasks[task_id] = _make_task(task_id, "working", context_id=context_id)
 
-    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id)
+    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, mcp_only=True)
 
     artifact_id = str(uuid.uuid4())
 

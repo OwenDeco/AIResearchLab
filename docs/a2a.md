@@ -19,8 +19,8 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
 
 ```json
 {
-  "name": "AI Systems Lab Agent",
-  "description": "Expert assistant for the AI Systems Lab platform...",
+  "name": "RAG Lab Agent",
+  "description": "This agent exposes a zorgplan MCP server, integrated through MuleSoft and ONS. Use it to retrieve the actuele zorgplannen (current care plans) of patients...",
   "url": "http://localhost:8002/a2a",
   "version": "1.0.0",
   "capabilities": {
@@ -33,28 +33,30 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
   "defaultOutputModes": ["text/plain"],
   "skills": [
     {
-      "id": "project-qa",
-      "name": "Project Q&A",
-      "description": "Answer any question about the AI Systems Lab application...",
-      "tags": ["rag", "documentation", "qa", "api-reference"]
-    },
-    {
       "id": "mcp-careplans",
       "name": "careplans",
       "description": "MCP server: careplans. Tools: fetch_careplan, list_careplans",
-      "tags": ["mcp", "careplans"]
+      "tags": ["mcp", "external"]
     }
   ]
 }
 ```
 
-**The `skills` list is dynamic.** It always includes:
+**The `skills` list is dynamic and MCP-only.** The card advertises exactly:
 
-1. **`project-qa`** — built-in Q&A over the project documentation
-2. **6 native data skills** (`native-list_documents`, `native-list_runs`, `native-get_run_detail`, `native-list_benchmarks`, `native-get_benchmark_results`, `native-get_analytics_summary`) — live queries against the AI Systems Lab database
-3. **One skill per registered MCP server connection** — external tools the agent can reach
+- **One skill per registered MCP server connection** that has **Use as agent tool** enabled — external tools the agent can reach.
 
-If no MCP servers are registered, only the Q&A and native data skills appear.
+The agent card deliberately does **not** advertise internal actions — the built-in `project-qa` Q&A skill and the 6 native data skills (`list_documents`, `list_runs`, `get_run_detail`, `list_benchmarks`, `get_benchmark_results`, `get_analytics_summary`) are omitted so external A2A clients (e.g. OutSystems) only see the connected MCP server tools. If no MCP servers are registered/enabled, the `skills` list is empty.
+
+### Inbound A2A execution is MCP-only
+
+Inbound A2A requests (`tasks/send` and `tasks/sendSubscribe` on `POST /a2a`) run the agent loop in **`mcp_only` mode** (`_run_agent_loop(..., mcp_only=True)`):
+
+- The only tools exposed to the LLM are the registered MCP server tools (filtered by **Use as agent tool**). Native data tools and external A2A agents are **not** available.
+- It uses a **minimal gateway system prompt** (`_MCP_ONLY_SYSTEM_PROMPT`) — not the full documentation context that `_build_system_prompt()` loads (~25k tokens). The agent only sees the caller's original request plus the tool schema, so each LLM call stays small and TPM usage drops sharply.
+- If the MCP server tool cannot be used — none registered/enabled, the model answers without calling it, the call errors, or it returns nothing — the agent returns the fixed string **`No result was found.`** instead of answering from internal knowledge.
+
+This gating applies only to the inbound A2A path. The System Agent (`platform_only=True`), the Playground agent, and the exposed MCP-server tool (`_run_agent_async(query)` in `mcp_server.py`) are unchanged and still have their normal tool sets.
 
 The `url` field is derived from the effective public base URL, computed at request time with this priority: (1) custom URL saved by the user in the database, (2) active ngrok tunnel URL, (3) `http://localhost:8002`. No in-memory state is involved — the correct URL is always used regardless of tunnel start/stop order.
 

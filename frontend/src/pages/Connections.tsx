@@ -562,7 +562,7 @@ function RegisteredCard({
           className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 border rounded-lg transition-colors ${showTest ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600'}`}
         >
           <FlaskConical size={12} />
-          {conn.type === 'mcp' && activeTool ? `Test: ${activeTool.name}` : 'Test'}
+          {showTest ? 'Hide test' : 'Test'}
         </button>
       </div>
 
@@ -590,11 +590,34 @@ function RegisteredCard({
                 )}
               </div>
             </div>
-          ) : schemas.length === 0 ? (
-            <p className="text-xs text-slate-400">No tools discovered for this server.</p>
           ) : (
-            /* MCP: tool selector + input form + result */
+            /* MCP: connectivity test + tool calling */
             <>
+              {/* Connectivity test */}
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400">Check that the MCP server is reachable.</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePing}
+                    disabled={pinging}
+                    className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {pinging ? <Loader2 size={12} className="animate-spin" /> : <FlaskConical size={12} />}
+                    Test connection
+                  </button>
+                  {pingResult && (
+                    <span className={`text-xs flex items-center gap-1 ${pingResult.status === 'ok' ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {pingResult.status === 'ok' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                      {pingResult.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {schemas.length === 0 ? (
+                <p className="text-xs text-slate-400">No tools discovered for this server.</p>
+              ) : (
+              <>
               {/* Tool selector */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tool</label>
@@ -684,6 +707,8 @@ function RegisteredCard({
                   </div>
                   <pre className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-2 overflow-auto max-h-48 whitespace-pre-wrap break-words text-slate-700 dark:text-slate-200">{callResult}</pre>
                 </div>
+              )}
+              </>
               )}
             </>
           )}

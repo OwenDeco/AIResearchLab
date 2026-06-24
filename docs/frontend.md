@@ -186,7 +186,7 @@ Third panel for managing external A2A agents and MCP servers:
 - Tab bar: **A2A Agents** | **MCP Servers**
 - **A2A tab**: register by Name + Agent Card URL. On registration the backend fetches the agent card to extract the task URL and skill list. Each registered connection shows name, task URL, skills chips, description, and Test / Delete buttons.
 - **MCP tab**: register by Name + Server URL (optionally Description). On registration the backend connects and discovers available tools. Each registered connection shows name, server URL, tools chips, and Test / Delete buttons.
-- **Test button**: pings the live connection and shows a status badge (active / error) with a message.
+- **Test button**: opens an inline test panel. For A2A it sends a connectivity ping; for MCP it shows a **Test connection** button (re-connects to the server and reports reachable / error) plus a tool runner to pick a discovered tool, fill its inputs, and call it live. Results show a status badge with a message.
 - Registered connections appear in the Playground's External Connection dropdown.
 
 ---
