@@ -47,38 +47,36 @@ def _agent_card() -> Dict[str, Any]:
     from api.routes.connections import get_effective_base_url
     base = get_effective_base_url().rstrip("/")
 
-    # Card advertises only registered external MCP servers — no internal
-    # (project Q&A / native data) actions.
-    skills: List[Dict[str, Any]] = []
-
-    # Append one skill per enabled MCP connection
-    for conn in _load_mcp_connections():
-        tool_names = [s["name"] for s in conn.get("tool_schemas", [])]
-        skills.append({
-            "id": f"mcp-{_safe_tool_name(conn['name'])}",
-            "name": conn["name"],
-            "description": conn.get("description", f"External MCP connection: {conn['name']}"),
-            "tags": ["mcp", "external"],
-            "examples": tool_names[:3],
-        })
-
-    # Append one skill per enabled A2A agent
-    for agent in _load_a2a_connections():
-        skills.append({
-            "id": f"a2a-{_safe_tool_name(agent['name'])}",
-            "name": agent["name"],
-            "description": agent.get("description", f"External A2A agent: {agent['name']}"),
-            "tags": ["a2a", "external"],
-            "examples": agent.get("skills", [])[:3],
-        })
+    # The agent answers questions about this project, grounded in the project's
+    # own documentation. It advertises a single project-Q&A skill and exposes no
+    # external MCP/A2A connections or internal data actions.
+    skills: List[Dict[str, Any]] = [
+        {
+            "id": "project-qa",
+            "name": "Project Q&A",
+            "description": (
+                "Answer questions about the RAG Lab platform — its features, REST "
+                "APIs, configuration, retrieval modes, chunking strategies, graph "
+                "extraction, benchmarking, and model providers — grounded in the "
+                "project's own documentation."
+            ),
+            "tags": ["qa", "documentation"],
+            "examples": [
+                "What retrieval modes are available?",
+                "How does Graph RAG work?",
+                "Which environment variables are required?",
+            ],
+        }
+    ]
 
     return {
         "name": "RAG Lab Agent",
         "description": (
-            "This agent exposes a zorgplan MCP server, integrated through MuleSoft "
-            "and ONS. Use it to retrieve the actuele zorgplannen (current care "
-            "plans) of patients. It forwards each request to the connected zorgplan "
-            "MCP server tool and returns the result; it exposes no other actions."
+            "Documentation-grounded Q&A agent for the RAG Lab platform. Ask it "
+            "anything about the project — features, REST APIs, configuration, "
+            "retrieval modes, chunking, graph extraction, benchmarking, and model "
+            "providers. Answers are drawn from the project's own documentation; it "
+            "exposes no other actions and no ingested user data."
         ),
         "url": f"{base}/a2a",
         "version": "1.0.0",
@@ -576,6 +574,7 @@ async def _run_agent_async(
     trace_id: Optional[str] = None,
     run_id: Optional[str] = None,
     mcp_only: bool = False,
+    platform_only: bool = False,
 ) -> str:
     """Single-turn entry point — used by A2A endpoint and MCP server tool."""
     return await _run_agent_loop(
@@ -583,6 +582,7 @@ async def _run_agent_async(
         trace_id=trace_id,
         run_id=run_id,
         mcp_only=mcp_only,
+        platform_only=platform_only,
     )
 
 
@@ -607,7 +607,7 @@ async def _handle_tasks_send(
     working_task = _make_task(task_id, "working", context_id=context_id)
     _tasks[task_id] = working_task
 
-    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, mcp_only=True)
+    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, platform_only=True)
 
     completed_task = _make_task(task_id, "completed", answer, context_id=context_id)
     _tasks[task_id] = completed_task
@@ -653,7 +653,7 @@ async def _stream_tasks_send_subscribe(
 
     _tasks[task_id] = _make_task(task_id, "working", context_id=context_id)
 
-    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, mcp_only=True)
+    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, platform_only=True)
 
     artifact_id = str(uuid.uuid4())
 

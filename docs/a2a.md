@@ -20,7 +20,7 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
 ```json
 {
   "name": "RAG Lab Agent",
-  "description": "This agent exposes a zorgplan MCP server, integrated through MuleSoft and ONS. Use it to retrieve the actuele zorgplannen (current care plans) of patients...",
+  "description": "Documentation-grounded Q&A agent for the RAG Lab platform. Ask it anything about the project — features, REST APIs, configuration, retrieval modes, chunking, graph extraction, benchmarking, and model providers...",
   "url": "http://localhost:8002/a2a",
   "version": "1.0.0",
   "capabilities": {
@@ -33,30 +33,27 @@ It describes the agent's name, capabilities, skills, and the URL of the task end
   "defaultOutputModes": ["text/plain"],
   "skills": [
     {
-      "id": "mcp-careplans",
-      "name": "careplans",
-      "description": "MCP server: careplans. Tools: fetch_careplan, list_careplans",
-      "tags": ["mcp", "external"]
+      "id": "project-qa",
+      "name": "Project Q&A",
+      "description": "Answer questions about the RAG Lab platform — features, REST APIs, configuration, retrieval modes, chunking, graph extraction, benchmarking, and model providers — grounded in the project's own documentation.",
+      "tags": ["qa", "documentation"],
+      "examples": ["What retrieval modes are available?", "How does Graph RAG work?", "Which environment variables are required?"]
     }
   ]
 }
 ```
 
-**The `skills` list is dynamic and MCP-only.** The card advertises exactly:
+**The `skills` list is a single static `project-qa` skill.** The card advertises exactly one capability — documentation-grounded Q&A about the platform. It deliberately does **not** advertise registered external MCP/A2A connections, nor the internal native data skills (`list_documents`, `list_runs`, `get_run_detail`, `list_benchmarks`, `get_benchmark_results`, `get_analytics_summary`), so external A2A clients (e.g. OutSystems) see one clear capability: ask questions about the project.
 
-- **One skill per registered MCP server connection** that has **Use as agent tool** enabled — external tools the agent can reach.
+### Inbound A2A execution is documentation-grounded Q&A
 
-The agent card deliberately does **not** advertise internal actions — the built-in `project-qa` Q&A skill and the 6 native data skills (`list_documents`, `list_runs`, `get_run_detail`, `list_benchmarks`, `get_benchmark_results`, `get_analytics_summary`) are omitted so external A2A clients (e.g. OutSystems) only see the connected MCP server tools. If no MCP servers are registered/enabled, the `skills` list is empty.
+Inbound A2A requests (`tasks/send` and `tasks/sendSubscribe` on `POST /a2a`) run the agent loop in **`platform_only` mode** (`_run_agent_loop(..., platform_only=True)`):
 
-### Inbound A2A execution is MCP-only
+- **No tools** are exposed to the LLM — no native data tools, no registered MCP servers, no external A2A agents. The agent answers purely from the project documentation loaded into the system prompt.
+- The knowledge source is **all git-tracked Markdown across the whole repository** (`README.md`, `docs/*.md`, `outsystems/README.md`, …), assembled by `_doc_files()` in `agent.py`. Files matched by `.gitignore` are filtered out via `git ls-files` (tracked-only) plus `git check-ignore`, so sensitive files — `.env`, `CLAUDE.md`, `CHANGELOG.md`, `tasks/`, the internal `.txt` specs — are **never** exposed. Sample-data fixtures under `backend/data/` are also excluded. If git is unavailable, it falls back to the curated `docs/` folder + `README.md`.
+- It uses the same **System Agent prompt** (`_build_system_prompt()`) as the UI System Agent: it answers questions about the platform's features/config/APIs and declines questions about ingested user data.
 
-Inbound A2A requests (`tasks/send` and `tasks/sendSubscribe` on `POST /a2a`) run the agent loop in **`mcp_only` mode** (`_run_agent_loop(..., mcp_only=True)`):
-
-- The only tools exposed to the LLM are the registered MCP server tools (filtered by **Use as agent tool**). Native data tools and external A2A agents are **not** available.
-- It uses a **minimal gateway system prompt** (`_MCP_ONLY_SYSTEM_PROMPT`) — not the full documentation context that `_build_system_prompt()` loads (~25k tokens). The agent only sees the caller's original request plus the tool schema, so each LLM call stays small and TPM usage drops sharply.
-- If the MCP server tool cannot be used — none registered/enabled, the model answers without calling it, the call errors, or it returns nothing — the agent returns the fixed string **`No result was found.`** instead of answering from internal knowledge.
-
-This gating applies only to the inbound A2A path. The System Agent (`platform_only=True`), the Playground agent, and the exposed MCP-server tool (`_run_agent_async(query)` in `mcp_server.py`) are unchanged and still have their normal tool sets.
+This mode matches the UI System Agent (`platform_only=True`). The Playground agent and the exposed MCP-server tool (`_run_agent_async(query)` in `mcp_server.py`) are unchanged and still have their normal tool sets (native data tools + registered MCP/A2A connections).
 
 The `url` field is derived from the effective public base URL, computed at request time with this priority: (1) custom URL saved by the user in the database, (2) active ngrok tunnel URL, (3) `http://localhost:8002`. No in-memory state is involved — the correct URL is always used regardless of tunnel start/stop order.
 
@@ -188,6 +185,8 @@ A2A_SYNTHESIZE=false
 ```
 
 When disabled, the raw tool result text is returned directly as the task artifact. Configurable from **Settings → Agent** in the UI without a restart.
+
+> **Note:** `A2A_SYNTHESIZE` has **no effect on inbound A2A requests**, which now run tool-less in `platform_only` mode (documentation-grounded Q&A) and always return a single natural-language answer. The setting still applies to the general agent loop used by the Playground and the exposed MCP-server tool.
 
 ---
 

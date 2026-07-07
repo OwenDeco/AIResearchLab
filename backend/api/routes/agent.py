@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+import subprocess
 import time
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -20,10 +21,26 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 _HISTORY_KEY = "agent_conversation"
 
-# Docs directory: two levels up from this file (backend/api/routes → project root → docs)
-_DOCS_DIR = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs")
+# Project root: three levels up from this file (backend/api/routes → backend → api → root)
+_PROJECT_ROOT = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..")
 )
+# Curated documentation folder: <project root>/docs
+_DOCS_DIR = os.path.join(_PROJECT_ROOT, "docs")
+
+# Preferred ordering for docs/ files; any remaining tracked docs are appended
+# alphabetically after these (see _order_doc_paths).
+_DOCS_ORDER = [
+    "overview.md", "configuration.md", "chunking.md", "retrieval.md",
+    "models.md", "graph.md", "benchmarking.md", "api-reference.md", "frontend.md",
+    "a2a.md", "mcp.md",
+]
+
+# The enumerated project-doc file list is TTL-cached so we don't spawn git on
+# every request (the concatenated content is separately mtime-cached below).
+_filelist_cache: Optional[List[str]] = None
+_filelist_ts: float = 0.0
+_FILELIST_TTL = 10.0  # seconds
 
 _SYSTEM_PROMPT_HEADER = """\
 You are the System Agent — a platform expert assistant for the RAG Lab application. \
@@ -54,36 +71,126 @@ Do not make up features or parameters that are not in the documentation.
 
 _docs_cache: Optional[str] = None
 _docs_mtime: float = 0.0  # max mtime of all doc files at last load
+_docs_key: Tuple[str, ...] = ()  # file set at last load (invalidates on add/remove)
+
+
+def _git_tracked_md() -> List[str]:
+    """Repo-relative paths of every git-tracked .md file, or [] on failure.
+
+    Tracked-only enumeration inherently excludes gitignored and untracked files,
+    so sensitive docs (.env, CLAUDE.md, tasks/, the internal .txt specs) never
+    appear here.
+    """
+    out = subprocess.run(
+        ["git", "ls-files", "-z", "--", "*.md"],
+        cwd=_PROJECT_ROOT, capture_output=True, timeout=5,
+    )
+    if out.returncode != 0:
+        return []
+    return [p for p in out.stdout.decode("utf-8", "replace").split("\0") if p]
+
+
+def _git_ignored(rel_paths: List[str]) -> set:
+    """Subset of rel_paths matched by .gitignore rules (via git check-ignore).
+
+    --no-index makes git evaluate the ignore rules even for tracked files, so a
+    force-added-but-ignored doc is still caught. Returns an empty set on any
+    failure (the tracked-only list is already safe in the normal case).
+    """
+    if not rel_paths:
+        return set()
+    try:
+        proc = subprocess.run(
+            ["git", "check-ignore", "--no-index", "--stdin", "-z"],
+            input=("\0".join(rel_paths) + "\0").encode("utf-8"),
+            cwd=_PROJECT_ROOT, capture_output=True, timeout=5,
+        )
+        # exit 0 = some ignored, 1 = none ignored, >1 = error
+        if proc.returncode not in (0, 1):
+            return set()
+        return {p for p in proc.stdout.decode("utf-8", "replace").split("\0") if p}
+    except Exception:
+        return set()
+
+
+def _order_doc_paths(paths: List[str]) -> List[str]:
+    """README first, then the curated docs/ order, then everything else A→Z."""
+    def sort_key(p: str):
+        rel = os.path.relpath(p, _PROJECT_ROOT).replace("\\", "/").lower()
+        name = os.path.basename(p)
+        if rel == "readme.md":
+            return (0, 0, rel)
+        if os.path.dirname(rel) == "docs" and name in _DOCS_ORDER:
+            return (1, _DOCS_ORDER.index(name), rel)
+        return (2, 0, rel)
+    return sorted(paths, key=sort_key)
+
+
+def _fallback_doc_files() -> List[str]:
+    """docs/ folder (curated order) + top-level README.md — always safe.
+
+    Used when git is unavailable so documentation loading never hard-fails.
+    """
+    paths: List[str] = []
+    readme = os.path.join(_PROJECT_ROOT, "README.md")
+    if os.path.isfile(readme):
+        paths.append(readme)
+    if os.path.isdir(_DOCS_DIR):
+        seen: set = set()
+        for fname in _DOCS_ORDER:
+            fpath = os.path.join(_DOCS_DIR, fname)
+            if os.path.isfile(fpath):
+                paths.append(fpath)
+                seen.add(fname)
+        try:
+            for fname in sorted(os.listdir(_DOCS_DIR)):
+                if fname.endswith(".md") and fname not in seen:
+                    paths.append(os.path.join(_DOCS_DIR, fname))
+        except Exception:
+            pass
+    return paths
+
+
+def _enumerate_project_docs() -> List[str]:
+    """Absolute paths of all project documentation (.md) to expose to the agent.
+
+    Sourced from git-tracked markdown across the whole repo, gitignore-filtered,
+    with sample-data fixtures (backend/data/) dropped. Falls back to docs/ +
+    README.md if git is unavailable.
+    """
+    try:
+        rels = _git_tracked_md()
+        if rels:
+            ignored = _git_ignored(rels)
+            rels = [
+                r for r in rels
+                if r not in ignored
+                and not r.replace("\\", "/").startswith("backend/data/")
+            ]
+            paths = [os.path.join(_PROJECT_ROOT, r.replace("/", os.sep)) for r in rels]
+            paths = [p for p in paths if os.path.isfile(p)]
+            if paths:
+                return _order_doc_paths(paths)
+    except Exception as exc:
+        logger.warning("Agent: git doc enumeration failed (%s); using docs/ fallback", exc)
+    return _fallback_doc_files()
 
 
 def _doc_files() -> List[str]:
-    """Return ordered list of doc file paths."""
-    if not os.path.isdir(_DOCS_DIR):
-        return []
-    order = [
-        "overview.md", "configuration.md", "chunking.md", "retrieval.md",
-        "models.md", "graph.md", "benchmarking.md", "api-reference.md", "frontend.md",
-        "a2a.md", "mcp.md",
-    ]
-    seen: set = set()
-    paths: List[str] = []
-    for fname in order:
-        fpath = os.path.join(_DOCS_DIR, fname)
-        if os.path.isfile(fpath):
-            paths.append(fpath)
-            seen.add(fname)
-    try:
-        for fname in sorted(os.listdir(_DOCS_DIR)):
-            if fname.endswith(".md") and fname not in seen:
-                paths.append(os.path.join(_DOCS_DIR, fname))
-    except Exception:
-        pass
-    return paths
+    """Ordered project doc file paths, TTL-cached to avoid spawning git per request."""
+    global _filelist_cache, _filelist_ts
+    now = time.time()
+    if _filelist_cache is not None and (now - _filelist_ts) < _FILELIST_TTL:
+        return _filelist_cache
+    files = _enumerate_project_docs()
+    _filelist_cache = files
+    _filelist_ts = now
+    return files
 
 
 def _load_docs() -> str:
     """Return concatenated docs, reloading from disk whenever a file has changed."""
-    global _docs_cache, _docs_mtime
+    global _docs_cache, _docs_mtime, _docs_key
 
     files = _doc_files()
     if not files:
@@ -95,7 +202,8 @@ def _load_docs() -> str:
     except Exception:
         current_mtime = 0.0
 
-    if _docs_cache is not None and current_mtime <= _docs_mtime:
+    key = tuple(files)
+    if _docs_cache is not None and key == _docs_key and current_mtime <= _docs_mtime:
         return _docs_cache  # nothing changed
 
     parts: List[str] = []
@@ -111,6 +219,7 @@ def _load_docs() -> str:
 
     _docs_cache = combined
     _docs_mtime = current_mtime
+    _docs_key = key
     return combined
 
 
@@ -295,9 +404,12 @@ def clear_history(db: Session = Depends(get_db)):
 
 @router.post("/reload-docs", status_code=200)
 def reload_docs():
-    """Force a doc reload on the next request by resetting the mtime sentinel."""
-    global _docs_mtime
+    """Force a doc reload on the next request: reset the mtime sentinel and the
+    TTL-cached file list so git re-enumerates the project docs."""
+    global _docs_mtime, _filelist_cache, _filelist_ts
     _docs_mtime = 0.0
+    _filelist_cache = None
+    _filelist_ts = 0.0
     return {"status": "cache cleared"}
 
 
