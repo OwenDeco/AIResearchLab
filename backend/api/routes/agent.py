@@ -7,7 +7,7 @@ import subprocess
 import time
 import uuid
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -42,6 +42,14 @@ _filelist_cache: Optional[List[str]] = None
 _filelist_ts: float = 0.0
 _FILELIST_TTL = 10.0  # seconds
 
+# Compact doc partition for high-concurrency inbound A2A: the core platform
+# docs only (~9k tokens vs ~30k for the full set), so 20+ simultaneous callers
+# don't blow through provider TPM limits. The UI System Agent keeps the full set.
+_COMPACT_DOC_NAMES = {
+    "overview.md", "configuration.md", "chunking.md", "retrieval.md",
+    "models.md", "graph.md", "benchmarking.md",
+}
+
 _SYSTEM_PROMPT_HEADER = """\
 You are the System Agent — a platform expert assistant for the RAG Lab application. \
 Your role is strictly limited to answering questions about the platform itself: \
@@ -69,9 +77,11 @@ Do not make up features or parameters that are not in the documentation.
 # Load documentation — auto-reloads when any .md file changes
 # ---------------------------------------------------------------------------
 
-_docs_cache: Optional[str] = None
-_docs_mtime: float = 0.0  # max mtime of all doc files at last load
-_docs_key: Tuple[str, ...] = ()  # file set at last load (invalidates on add/remove)
+# Content caches, keyed by the `compact` flag (False = full set, True = A2A
+# partition) so the two variants don't evict each other.
+_docs_cache: Dict[bool, str] = {}
+_docs_mtime: Dict[bool, float] = {}  # max mtime of all doc files at last load
+_docs_key: Dict[bool, Tuple[str, ...]] = {}  # file set at last load (invalidates on add/remove)
 
 
 def _git_tracked_md() -> List[str]:
@@ -188,11 +198,16 @@ def _doc_files() -> List[str]:
     return files
 
 
-def _load_docs() -> str:
-    """Return concatenated docs, reloading from disk whenever a file has changed."""
-    global _docs_cache, _docs_mtime, _docs_key
+def _load_docs(compact: bool = False) -> str:
+    """Return concatenated docs, reloading from disk whenever a file has changed.
 
+    compact=True restricts to the _COMPACT_DOC_NAMES partition (inbound A2A);
+    compact=False loads the full project doc set (UI System Agent).
+    """
     files = _doc_files()
+    if compact:
+        # Fall back to the full set if the partition matches nothing.
+        files = [f for f in files if os.path.basename(f) in _COMPACT_DOC_NAMES] or files
     if not files:
         return "(No documentation available.)"
 
@@ -203,8 +218,12 @@ def _load_docs() -> str:
         current_mtime = 0.0
 
     key = tuple(files)
-    if _docs_cache is not None and key == _docs_key and current_mtime <= _docs_mtime:
-        return _docs_cache  # nothing changed
+    if (
+        compact in _docs_cache
+        and key == _docs_key.get(compact)
+        and current_mtime <= _docs_mtime.get(compact, 0.0)
+    ):
+        return _docs_cache[compact]  # nothing changed
 
     parts: List[str] = []
     for fpath in files:
@@ -215,16 +234,17 @@ def _load_docs() -> str:
             logger.warning("Agent: could not read %s: %s", fpath, exc)
 
     combined = "\n\n---\n\n".join(parts) if parts else "(No documentation files found.)"
-    logger.info("Agent: reloaded %d doc file(s), %d chars total.", len(parts), len(combined))
+    logger.info("Agent: reloaded %d doc file(s) (compact=%s), %d chars total.",
+                len(parts), compact, len(combined))
 
-    _docs_cache = combined
-    _docs_mtime = current_mtime
-    _docs_key = key
+    _docs_cache[compact] = combined
+    _docs_mtime[compact] = current_mtime
+    _docs_key[compact] = key
     return combined
 
 
-def _build_system_prompt() -> str:
-    return _SYSTEM_PROMPT_HEADER + _load_docs() + "\n\n===== END OF DOCUMENTATION ====="
+def _build_system_prompt(compact: bool = False) -> str:
+    return _SYSTEM_PROMPT_HEADER + _load_docs(compact=compact) + "\n\n===== END OF DOCUMENTATION ====="
 
 
 # ---------------------------------------------------------------------------
@@ -406,8 +426,10 @@ def clear_history(db: Session = Depends(get_db)):
 def reload_docs():
     """Force a doc reload on the next request: reset the mtime sentinel and the
     TTL-cached file list so git re-enumerates the project docs."""
-    global _docs_mtime, _filelist_cache, _filelist_ts
-    _docs_mtime = 0.0
+    global _filelist_cache, _filelist_ts
+    _docs_cache.clear()
+    _docs_mtime.clear()
+    _docs_key.clear()
     _filelist_cache = None
     _filelist_ts = 0.0
     return {"status": "cache cleared"}

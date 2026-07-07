@@ -51,7 +51,17 @@ Inbound A2A requests (`tasks/send` and `tasks/sendSubscribe` on `POST /a2a`) run
 
 - **No tools** are exposed to the LLM — no native data tools, no registered MCP servers, no external A2A agents. The agent answers purely from the project documentation loaded into the system prompt.
 - The knowledge source is **all git-tracked Markdown across the whole repository** (`README.md`, `docs/*.md`, `outsystems/README.md`, …), assembled by `_doc_files()` in `agent.py`. Files matched by `.gitignore` are filtered out via `git ls-files` (tracked-only) plus `git check-ignore`, so sensitive files — `.env`, `CLAUDE.md`, `CHANGELOG.md`, `tasks/`, the internal `.txt` specs — are **never** exposed. Sample-data fixtures under `backend/data/` are also excluded. If git is unavailable, it falls back to the curated `docs/` folder + `README.md`.
+- Inbound A2A uses the **compact doc partition** (`compact_docs=True` → `_COMPACT_DOC_NAMES` in `agent.py`): the seven core platform docs (`overview`, `configuration`, `chunking`, `retrieval`, `models`, `graph`, `benchmarking`) — **~9k tokens per call instead of ~30k** — so bursts of simultaneous callers don't exhaust provider TPM limits. The UI System Agent keeps the full doc set.
 - It uses the same **System Agent prompt** (`_build_system_prompt()`) as the UI System Agent: it answers questions about the platform's features/config/APIs and declines questions about ingested user data.
+- Answers are **plain prose, not Markdown** (`_A2A_PLAIN_STYLE` in `a2a.py`): the card advertises `text/plain` output and external callers typically render the artifact text raw, so the model is instructed to reply in one short paragraph with no headers, lists, bold markers, or line breaks. The UI System Agent still answers in Markdown (the web UI renders it).
+
+### Concurrency
+
+The tool-less inbound path is built to survive a burst of simultaneous callers (e.g. a live demo):
+
+- The blocking LLM provider call runs in a worker thread (`asyncio.to_thread`), so one in-flight request never blocks the event loop for the others.
+- An `asyncio.Semaphore(4)` (`_LLM_MAX_CONCURRENCY` in `a2a.py`) caps in-flight LLM calls, so a burst is served in waves instead of triggering a provider 429 storm.
+- Measured with `AGENT_MODEL=openai/gpt-4o-mini`: **20 simultaneous `tasks/send` requests → 20/20 answered**, median ~14s, worst ~22s, no rate-limit errors.
 
 This mode matches the UI System Agent (`platform_only=True`). The Playground agent and the exposed MCP-server tool (`_run_agent_async(query)` in `mcp_server.py`) are unchanged and still have their normal tool sets (native data tools + registered MCP/A2A connections).
 

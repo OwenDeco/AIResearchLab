@@ -163,6 +163,19 @@ def _jsonrpc_error(rpc_id: Any, code: int, message: str) -> Dict:
 
 _MAX_TOOL_ITERATIONS = 10
 
+# Cap concurrent LLM calls on the tool-less (platform_only) path so a burst of
+# inbound A2A requests (e.g. a live demo) doesn't turn into a provider 429
+# storm. Created lazily so it binds to uvicorn's running event loop.
+_LLM_MAX_CONCURRENCY = 4
+_llm_semaphore: Optional[asyncio.Semaphore] = None
+
+
+def _get_llm_semaphore() -> asyncio.Semaphore:
+    global _llm_semaphore
+    if _llm_semaphore is None:
+        _llm_semaphore = asyncio.Semaphore(_LLM_MAX_CONCURRENCY)
+    return _llm_semaphore
+
 # Returned by the inbound A2A agent (mcp_only mode) when the registered MCP
 # server tool could not be used or produced nothing.
 _NO_RESULT_MESSAGE = "No result was found."
@@ -175,6 +188,19 @@ _MCP_ONLY_SYSTEM_PROMPT = (
     "request, calling them with the information in the request itself. Do not add "
     "outside knowledge or context. If no tool can satisfy the request, return "
     "nothing."
+)
+
+# Appended to the system prompt on the inbound A2A path: external callers
+# (e.g. OutSystems) usually render the artifact text raw, so Markdown syntax
+# and line breaks show up as literal noise ("**", "\n") instead of formatting.
+# The agent card promises text/plain output — honor it.
+_A2A_PLAIN_STYLE = (
+    "\n\nRESPONSE STYLE (important): The caller displays your answer as raw "
+    "plain text, so do NOT use Markdown — no headers, no bullet or numbered "
+    "lists, no bold/italic markers, no code blocks, and no line breaks. "
+    "Answer in one short flowing paragraph of plain conversational prose "
+    "(roughly two to five sentences). When you need to enumerate items, name "
+    "them inline separated by commas."
 )
 
 
@@ -325,12 +351,16 @@ async def _run_agent_loop(
     run_id: Optional[str] = None,
     platform_only: bool = False,
     mcp_only: bool = False,
+    compact_docs: bool = False,
 ) -> str:
     """
     Full tool-calling agent loop.
 
     messages — conversation turns WITHOUT the system prompt (list of
     {"role": "user"|"assistant", "content": "..."} dicts).
+
+    compact_docs=True loads the compact doc partition (~9k tokens) instead of
+    the full project doc set — used by inbound A2A to survive bursts.
 
     Uses LLM function calling to decide which native data tools or registered
     external MCP tools to invoke, then synthesises a final answer.
@@ -364,7 +394,11 @@ async def _run_agent_loop(
 
     # mcp_only mode uses a tiny gateway prompt — no documentation context — so
     # each call only carries the original request plus the tool schema.
-    system_content = _MCP_ONLY_SYSTEM_PROMPT if mcp_only else _build_system_prompt()
+    system_content = _MCP_ONLY_SYSTEM_PROMPT if mcp_only else _build_system_prompt(compact=compact_docs)
+    if compact_docs:
+        # compact_docs marks the inbound A2A path — style the answer for raw
+        # plain-text display by the external caller (card advertises text/plain).
+        system_content += _A2A_PLAIN_STYLE
     full_messages: List[Dict] = [
         {"role": "system", "content": system_content}
     ] + list(messages)
@@ -388,7 +422,12 @@ async def _run_agent_loop(
             # call tools) — never answer from internal knowledge here.
             return _NO_RESULT_MESSAGE
         try:
-            response = llm.complete(messages=full_messages, temperature=0.2, max_tokens=2048)
+            # Run the blocking provider call in a worker thread (keeps the event
+            # loop free) and cap in-flight calls so bursts don't 429-storm.
+            async with _get_llm_semaphore():
+                response = await asyncio.to_thread(
+                    llm.complete, messages=full_messages, temperature=0.2, max_tokens=2048,
+                )
         except Exception as exc:
             return f"Error: {exc}"
         _log_trace(trace_id, event_type="llm_tool_selection", direction="internal",
@@ -488,7 +527,6 @@ async def _run_agent_loop(
                                         "result_preview": result_preview})
                     logger.info("Agent: MCP tool '%s' on '%s' called", original_name, conn["name"])
                 elif fn_name in a2a_name_map:
-                    import asyncio
                     from connections.a2a_client import call_agent
                     agent_conn = a2a_name_map[fn_name]
                     query = fn_args.get("query", "")
@@ -575,6 +613,7 @@ async def _run_agent_async(
     run_id: Optional[str] = None,
     mcp_only: bool = False,
     platform_only: bool = False,
+    compact_docs: bool = False,
 ) -> str:
     """Single-turn entry point — used by A2A endpoint and MCP server tool."""
     return await _run_agent_loop(
@@ -583,6 +622,7 @@ async def _run_agent_async(
         run_id=run_id,
         mcp_only=mcp_only,
         platform_only=platform_only,
+        compact_docs=compact_docs,
     )
 
 
@@ -607,7 +647,7 @@ async def _handle_tasks_send(
     working_task = _make_task(task_id, "working", context_id=context_id)
     _tasks[task_id] = working_task
 
-    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, platform_only=True)
+    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, platform_only=True, compact_docs=True)
 
     completed_task = _make_task(task_id, "completed", answer, context_id=context_id)
     _tasks[task_id] = completed_task
@@ -653,7 +693,7 @@ async def _stream_tasks_send_subscribe(
 
     _tasks[task_id] = _make_task(task_id, "working", context_id=context_id)
 
-    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, platform_only=True)
+    answer = await _run_agent_async(user_text, trace_id=trace_id, run_id=run_id, platform_only=True, compact_docs=True)
 
     artifact_id = str(uuid.uuid4())
 
